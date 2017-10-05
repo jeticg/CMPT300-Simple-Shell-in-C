@@ -8,7 +8,11 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <pwd.h>
+
 #include "errorExplain.h"
+#include "aux.h"
 
 // Main
 int main() {
@@ -64,6 +68,10 @@ int tokeniseCommand(char *buff, char *tokens[]) {
     int tokenCount = 0;
     _Bool inToken = false;
     int numChars = (int)strnlen(buff, COMMAND_LENGTH);
+    struct passwd *pw = getpwuid(getuid());
+    char *homedir = pw->pw_dir;
+    expandHome(buff, COMMAND_LENGTH);
+    numChars = (int)strnlen(buff, COMMAND_LENGTH);
     for (int i = 0; i < numChars; i++) {
         switch (buff[i]) {
             // Handle token delimiters (ends):
@@ -192,25 +200,25 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
     if (strcmp(tokens[0], "exit") == 0 || strcmp(tokens[0], "quit") == 0)
         coreExit();
     if (executionCode == DIRECT_EXECUTION) {
+        if (execInternalCommand(tokens) == 2) return;
         int pid = fork();
         if (pid < 0) {
             printf("Something is wrong. TAT\n");
             return;
         } else if (pid == 0) {
-            if (execInternalCommand(tokens) == 0)
-                callExecvp(tokens[0], tokens);
+            callExecvp(tokens[0], tokens);
             exit(0);
         } else {
-            wait(NULL);
+            waitpid(-1, NULL, 0);
         }
     } else if (executionCode == BACKGROUND_EXECUTION) {
+        if (execInternalCommand(tokens) == 2) return;
         int pid = fork();
         if (pid < 0) {
             printf("Something is wrong. TAT\n");
             return;
         } else if (pid == 0) {
-            if (execInternalCommand(tokens) == 0)
-                callExecvp(tokens[0], tokens);
+            callExecvp(tokens[0], tokens);
             exit(0);
         } else {
             write(STDOUT_FILENO, "[B] ", strlen("[B] "));

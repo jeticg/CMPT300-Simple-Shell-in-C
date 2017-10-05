@@ -17,11 +17,11 @@ all: shell shell_sol errorExplain
 
 
 
-shell: shell.o errorExplain.o
-	$(CC) -o shell shell.o errorExplain.o $(CCFLAGS)
+shell: shell.o errorExplain.o aux.o
+	$(CC) -o shell shell.o errorExplain.o aux.o $(CCFLAGS)
 
-shell_sol: shell_sol.o errorExplain.o
-	$(CC) -o shell_sol shell_sol.o errorExplain.o $(CCFLAGS)
+shell_sol: shell_sol.o errorExplain.o aux.o
+	$(CC) -o shell_sol shell_sol.o errorExplain.o aux.o $(CCFLAGS)
 
 clean:
 	rm -f core *.o shell shell_sol
