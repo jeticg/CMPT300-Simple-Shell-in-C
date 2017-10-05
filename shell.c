@@ -171,7 +171,7 @@ int execInternalCommand(char *tokens[]) {
     }
     if (strcmp(tokens[0], "pwd") == 0) {
         char *buff = getcwd(NULL, 0);
-        write(STDOUT_FILENO, buff, strnlen(buff, COMMAND_LENGTH));
+        write(STDOUT_FILENO, buff, strlen(buff));
         write(STDOUT_FILENO, "\n", 1);
         return 2;
     }
@@ -183,6 +183,27 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
         execCommand
         This function will execute a single command.
     */
+    #ifdef DEBUG
+    write(STDOUT_FILENO, "    Executing Single Command: ",
+          strlen("    Executing Single Command: "));
+    write(STDOUT_FILENO, tokens[0], strlen(tokens[0]));
+    write(STDOUT_FILENO, "\n", 1);
+    #endif
+    if (executionCode == DIRECT_EXECUTION) {
+        int pid = fork();
+        if (pid < 0) {
+            printf("Something is wrong. TAT\n");
+            return;
+        } else if (pid == 0) {
+            execvp(tokens[0], tokens);
+            exit(0);
+        } else {
+            wait(NULL);
+        }
+    } else {
+        write(STDOUT_FILENO, "Execution mode not implemented.\n",
+              strlen("Execution mode not implemented.\n"));
+    }
 }
 
 void execCommand(char *tokens[]) {
@@ -190,15 +211,15 @@ void execCommand(char *tokens[]) {
         execCommand
         This function will process the tokens into different commmands and execute
         them by calling execSingleCommand.
-    */
-    int pid = fork();
-    if (pid < 0) {
-        printf("Something is wrong. TAT\n");
-        return;
-    } else if (pid == 0) {
-        execvp(tokens[0], tokens);
-        exit(0);
-    } else {
-        wait(NULL);
+
+    char **startOfCommand = &tokens[0];
+    for (int i=0; tokens[i] != NULL; i++) {
+        if (strcmp(tokens[i], "&&") == 0) {
+            startOfCommand = &tokens[i + 1];
+            tokens[i] = NULL;
+
+        }
     }
+    */
+    execSingleCommand(tokens, DIRECT_EXECUTION);
 }
