@@ -35,18 +35,7 @@ int main(int argc, char* argv[]) {
         }
         #endif
 
-        // Internal commands
-        int tmp = execInternalCommand(tokens);
-        if (tmp == 1) {
-            // Returns 1 if command is exit
-            return 0;
-        } else if (tmp == 2) {
-            // Returns 2 if internal command is recognised and executed
-            // otherwise will proceed to external commands.
-            continue;
-        }
-
-        // External commands
+        // Execute commands
         execCommand(tokens);
         if (inBackground) {
             #ifdef DEBUG
@@ -117,6 +106,10 @@ int tokeniseCommand(char *buff, char *tokens[]) {
     return tokenCount;
 }
 
+void coreExit() {
+    exit(0);
+}
+
 void readCommand(char *buff, char *tokens[], _Bool *inBackground) {
     /*
         Read a command from the keyboard into the buffer 'buff' and Tokenise it
@@ -163,7 +156,8 @@ void readCommand(char *buff, char *tokens[], _Bool *inBackground) {
 int execInternalCommand(char *tokens[]) {
     if (tokens[0] == NULL) return 2;
     if (strcmp(tokens[0], "exit") == 0 || strcmp(tokens[0], "quit") == 0) {
-        return 1;
+        coreExit();
+        return 2;
     }
     if (strcmp(tokens[0], "cd") == 0) {
         chdir(tokens[1]);
@@ -195,7 +189,8 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
             printf("Something is wrong. TAT\n");
             return;
         } else if (pid == 0) {
-            execvp(tokens[0], tokens);
+            if (execInternalCommand(tokens) == 0)
+                execvp(tokens[0], tokens);
             exit(0);
         } else {
             wait(NULL);
