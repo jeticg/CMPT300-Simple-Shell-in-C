@@ -68,8 +68,6 @@ int tokeniseCommand(char *buff, char *tokens[]) {
     int tokenCount = 0;
     _Bool inToken = false;
     int numChars = (int)strnlen(buff, COMMAND_LENGTH);
-    struct passwd *pw = getpwuid(getuid());
-    char *homedir = pw->pw_dir;
     expandHome(buff, COMMAND_LENGTH);
     numChars = (int)strnlen(buff, COMMAND_LENGTH);
     for (int i = 0; i < numChars; i++) {
@@ -151,7 +149,13 @@ int execInternalCommand(char *tokens[]) {
     */
     if (tokens == NULL || tokens[0] == NULL) return 2;
     if (strcmp(tokens[0], "cd") == 0) {
-        chdir(tokens[1]);
+        if (tokens[1] != NULL)
+            chdir(tokens[1]);
+        else {
+            struct passwd *pw = getpwuid(getuid());
+            char *homedir = pw->pw_dir;
+            chdir(homedir);
+        }
         return 2;
     }
     if (strcmp(tokens[0], "pwd") == 0) {
