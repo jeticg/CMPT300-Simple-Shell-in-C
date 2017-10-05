@@ -155,10 +155,6 @@ void readCommand(char *buff, char *tokens[], _Bool *inBackground) {
 
 int execInternalCommand(char *tokens[]) {
     if (tokens[0] == NULL) return 2;
-    if (strcmp(tokens[0], "exit") == 0 || strcmp(tokens[0], "quit") == 0) {
-        coreExit();
-        return 2;
-    }
     if (strcmp(tokens[0], "cd") == 0) {
         chdir(tokens[1]);
         return 2;
@@ -183,6 +179,8 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
     write(STDOUT_FILENO, tokens[0], strlen(tokens[0]));
     write(STDOUT_FILENO, "\n", 1);
     #endif
+    if (strcmp(tokens[0], "exit") == 0 || strcmp(tokens[0], "quit") == 0)
+        coreExit();
     if (executionCode == DIRECT_EXECUTION) {
         int pid = fork();
         if (pid < 0) {
