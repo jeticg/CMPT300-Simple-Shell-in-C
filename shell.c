@@ -139,7 +139,7 @@ int execInternalCommand(char *tokens[]) {
         exit code: 2, internal command recognised and executed.
         exit code: 0, command is not internal command.
     */
-    if (tokens[0] == NULL) return 2;
+    if (tokens == NULL || tokens[0] == NULL) return 2;
     if (strcmp(tokens[0], "cd") == 0) {
         chdir(tokens[1]);
         return 2;
