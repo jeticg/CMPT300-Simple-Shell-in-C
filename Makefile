@@ -17,10 +17,10 @@ all: shell shell_sol errorExplain
 
 
 
-shell: shell.o
+shell: shell.o errorExplain.o
 	$(CC) -o shell shell.o errorExplain.o $(CCFLAGS)
 
-shell_sol: shell_sol.o
+shell_sol: shell_sol.o errorExplain.o
 	$(CC) -o shell_sol shell_sol.o errorExplain.o $(CCFLAGS)
 
 clean:
