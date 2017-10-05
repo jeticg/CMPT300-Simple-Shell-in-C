@@ -8,6 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include "errorExplain.h"
 
 // Main
 int main() {
@@ -156,10 +157,13 @@ int execInternalCommand(char *tokens[]) {
 
 void callExecvp(const char *pathname, char *const *argv) {
     if (execvp(pathname, argv) < 0) {
-        write(STDERR_FILENO, "Error code:", strlen("Error code:"));
+        write(STDERR_FILENO, "Error code ", strlen("Error code "));
         char str[MAX_STRLEN];
         snprintf(str, MAX_STRLEN, "%d", errno);
         write(STDOUT_FILENO, str, strlen(str));
+        write(STDOUT_FILENO, ",", 1);
+        char *msg = explainError(errno);
+        write(STDOUT_FILENO, msg, strlen(msg));
         write(STDOUT_FILENO, "\n", 1);
         exit(errno);
     } else exit(0);

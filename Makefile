@@ -6,21 +6,22 @@ CC=cc
 CXX=CC
 CCFLAGS= -g -std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Werror -Wextra -Wconversion -DDEBUG
 
-all: shell shell_sol
+all: shell shell_sol errorExplain
 
 # Compile all .c files into .o files
 # % matches all (like * in a command)
 # $< is the source file (.c file)
+
 %.o : %.c
 	$(CC) -c $(CCFLAGS) $<
 
 
 
 shell: shell.o
-	$(CC) -o shell shell.o $(CCFLAGS)
+	$(CC) -o shell shell.o errorExplain.o $(CCFLAGS)
 
 shell_sol: shell_sol.o
-	$(CC) -o shell_sol shell_sol.o $(CCFLAGS)
+	$(CC) -o shell_sol shell_sol.o errorExplain.o $(CCFLAGS)
 
 clean:
 	rm -f core *.o shell shell_sol
