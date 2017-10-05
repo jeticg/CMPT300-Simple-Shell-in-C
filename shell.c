@@ -10,6 +10,12 @@
 
 // Main
 int main(int argc, char* argv[]) {
+    #ifdef DEBUG
+    write(STDOUT_FILENO,
+          "Built in DEBUG mode.\n",
+          strlen("Built in DEBUG mode.\n"));
+    #endif
+
     char inputBuffer[COMMAND_LENGTH];
     char *tokens[NUM_TOKENS];
     while (true) {
@@ -28,12 +34,26 @@ int main(int argc, char* argv[]) {
             write(STDOUT_FILENO, "\n", strlen("\n"));
         }
         #endif
-        if (strcmp(tokens[0], "exit") == 0 || strcmp(tokens[0], "quit") == 0) {
+
+        // Internal commands
+        int tmp = execInternalCommand(tokens);
+        if (tmp == 1) {
+            // Returns 1 if command is exit
             return 0;
+        } else if (tmp == 2) {
+            // Returns 2 if internal command is recognised and executed
+            // otherwise will proceed to external commands.
+            continue;
         }
+
+        // External commands
+        execCommand(tokens);
         if (inBackground) {
+            #ifdef DEBUG
             write(STDOUT_FILENO, "Run in background.",
                   strlen("Run in background."));
+            #endif
+        } else {
         }
 
         /**
@@ -68,6 +88,15 @@ int tokeniseCommand(char *buff, char *tokens[]) {
     for (int i = 0; i < numChars; i++) {
         switch (buff[i]) {
             // Handle token delimiters (ends):
+            case '\\':
+                if (i + 1 < numChars) {
+                    for (int j = i; j < numChars; j++) {
+                        buff[j] = buff[j + 1];
+                    }
+                    numChars--;
+                    i++;
+                    break;
+                }
             case ' ':
             case '\t':
             case '\n':
@@ -131,6 +160,25 @@ void readCommand(char *buff, char *tokens[], _Bool *inBackground) {
     }
 }
 
+int execInternalCommand(char *tokens[]) {
+    if (tokens[0] == NULL) return 2;
+    if (strcmp(tokens[0], "exit") == 0 || strcmp(tokens[0], "quit") == 0) {
+        return 1;
+    }
+    if (strcmp(tokens[0], "cd") == 0) {
+        chdir(tokens[1]);
+        return 2;
+    }
+    if (strcmp(tokens[0], "pwd") == 0) {
+        char *buff = NULL;
+        int size = -1;
+        getcwd(buff, size);
+        printf("%s %d", buff, size);
+        return 2;
+    }
+    return 0;
+}
+
 void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
     /*
         execCommand
@@ -144,5 +192,14 @@ void execCommand(char *tokens[]) {
         This function will process the tokens into different commmands and execute
         them by calling execSingleCommand.
     */
-
+    int pid = fork();
+    if (pid < 0) {
+        printf("Something is wrong. TAT\n");
+        return;
+    } else if (pid == 0) {
+        execvp(tokens[0], tokens);
+        exit(0);
+    } else {
+        wait(NULL);
+    }
 }

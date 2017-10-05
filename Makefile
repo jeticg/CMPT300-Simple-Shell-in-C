@@ -1,10 +1,10 @@
-## This is a simple Makefile with lots of comments 
+## This is a simple Makefile with lots of comments
 ## Check Unix Programming Tools handout for more info.
 
 # Define what compiler to use and the flags.
 CC=cc
 CXX=CC
-CCFLAGS= -g -std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Werror
+CCFLAGS= -g -std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Werror -DDEBUG
 
 all: shell shell_sol
 
@@ -16,12 +16,11 @@ all: shell shell_sol
 
 
 
-shell: shell.o 
+shell: shell.o
 	$(CC) -o shell shell.o $(CCFLAGS)
 
-shell_sol: shell_sol.o 
+shell_sol: shell_sol.o
 	$(CC) -o shell_sol shell_sol.o $(CCFLAGS)
 
 clean:
 	rm -f core *.o shell shell_sol
-
