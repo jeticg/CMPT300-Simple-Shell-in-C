@@ -187,6 +187,22 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
         } else {
             wait(NULL);
         }
+    } else if (executionCode == BACKGROUND_EXECUTION) {
+        int pid = fork();
+        if (pid < 0) {
+            printf("Something is wrong. TAT\n");
+            return;
+        } else if (pid == 0) {
+            if (execInternalCommand(tokens) == 0)
+                execvp(tokens[0], tokens);
+            exit(0);
+        } else {
+            write(STDOUT_FILENO, "[B] ", strlen("[B] "));
+            char str[MAX_STRLEN];
+            snprintf(str, MAX_STRLEN, "%d", pid);
+            write(STDOUT_FILENO, str, strlen(str));
+            write(STDOUT_FILENO, "\n", 1);
+        }
     } else {
         write(STDOUT_FILENO, "Execution mode not implemented.\n",
               strlen("Execution mode not implemented.\n"));
