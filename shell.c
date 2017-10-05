@@ -23,8 +23,7 @@ int main(int argc, char* argv[]) {
         // Use write because we need to use read() to work with
         // signals, and read() is incompatible with printf().
         write(STDOUT_FILENO, "> ", strlen("> "));
-        _Bool inBackground = false;
-        readCommand(inputBuffer, tokens, &inBackground);
+        readCommand(inputBuffer, tokens);
 
         // DEBUG: Dump out arguments:
         #ifdef DEBUG
@@ -37,21 +36,10 @@ int main(int argc, char* argv[]) {
 
         // Execute commands
         execCommand(tokens);
-        if (inBackground) {
-            #ifdef DEBUG
-            write(STDOUT_FILENO, "Run in background.",
-                  strlen("Run in background."));
-            #endif
-        } else {
-        }
-
         /**
          * Steps For Basic Shell:
          * 1. Fork a child process
          * 2. Child process invokes execvp() using results in token array.
-         * 3. If inBackground is false, parent waits for
-         *    child to finish. Otherwise, parent loops back to
-         *    readCommand() again immediately.
          */
 
     }
@@ -110,7 +98,7 @@ void coreExit() {
     exit(0);
 }
 
-void readCommand(char *buff, char *tokens[], _Bool *inBackground) {
+void readCommand(char *buff, char *tokens[]) {
     /*
         Read a command from the keyboard into the buffer 'buff' and Tokenise it
         such that 'tokens[i]' points into 'buff' to the i'th token in the
@@ -118,14 +106,9 @@ void readCommand(char *buff, char *tokens[], _Bool *inBackground) {
         buff: Buffer allocated by the calling code. Must be at least
               COMMAND_LENGTH bytes long.
         tokens[]: Array of character pointers which point into 'buff'. Must be
-                  at least NUM_TOKENS long. Will strip out up to one final '&'
-                  token. Tokens will be NULL terminated (a NULL pointer
+                  at least NUM_TOKENS long. Tokens will be NULL terminated (a NULL pointer
                   indicates end of tokens).
-        inBackground: pointer to a boolean variable. Set to true if user
-                      entered an & as their last token; otherwise set to false.
     */
-    *inBackground = false;
-
     // Read input
     int length = read(STDIN_FILENO, buff, COMMAND_LENGTH-1);
 
@@ -144,12 +127,6 @@ void readCommand(char *buff, char *tokens[], _Bool *inBackground) {
     int tokenCount = tokeniseCommand(buff, tokens);
     if (tokenCount == 0) {
         return;
-    }
-
-    // Extract if running in background:
-    if (tokenCount > 0 && strcmp(tokens[tokenCount - 1], "&") == 0) {
-        *inBackground = true;
-        tokens[tokenCount - 1] = 0;
     }
 }
 
@@ -231,8 +208,7 @@ void execCommand(char *tokens[]) {
             startOfCommand = &tokens[i + 1];
             tokens[i] = NULL;
             execSingleCommand(oldStartOfCommand, DIRECT_EXECUTION);
-        }
-        if (strcmp(tokens[i], "&") == 0) {
+        } else if (strcmp(tokens[i], "&") == 0) {
             char **oldStartOfCommand = startOfCommand;
             startOfCommand = &tokens[i + 1];
             tokens[i] = NULL;

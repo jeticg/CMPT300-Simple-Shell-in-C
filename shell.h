@@ -15,7 +15,7 @@
 
 // Functions
 int tokeniseCommand(char *buff, char *tokens[]);
-void readCommand(char *buff, char *tokens[], _Bool *inBackground);
+void readCommand(char *buff, char *tokens[]);
 int execInternalCommand(char *tokens[]);
 void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode);
 void execCommand(char *tokens[]);
