@@ -89,10 +89,10 @@ int tokeniseCommand(char *buff, char *tokens[]) {
         switch (buff[i]) {
             // Handle token delimiters (ends):
             case '\\':
+                // Handle special characters to allow spaces among tokens
                 if (i + 1 < numChars) {
-                    for (int j = i; j < numChars; j++) {
+                    for (int j = i; j < numChars; j++)
                         buff[j] = buff[j + 1];
-                    }
                     numChars--;
                     i++;
                     break;
