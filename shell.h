@@ -20,6 +20,7 @@
 int tokeniseCommand(char *buff, char *tokens[]);
 void readCommand(char *buff, char *tokens[]);
 int execInternalCommand(char *tokens[]);
+void callExecvp(const char *pathname, char *const *argv);
 void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode);
 void execCommand(char *tokens[]);
 void coreExit();

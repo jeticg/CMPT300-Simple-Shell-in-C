@@ -7,9 +7,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 // Main
-int main(int argc, char* argv[]) {
+int main() {
     #ifdef DEBUG
     write(STDOUT_FILENO,
           "Built in DEBUG mode.\n",
@@ -61,7 +62,7 @@ int tokeniseCommand(char *buff, char *tokens[]) {
     */
     int tokenCount = 0;
     _Bool inToken = false;
-    int numChars = strnlen(buff, COMMAND_LENGTH);
+    int numChars = (int)strnlen(buff, COMMAND_LENGTH);
     for (int i = 0; i < numChars; i++) {
         switch (buff[i]) {
             // Handle token delimiters (ends):
@@ -110,7 +111,7 @@ void readCommand(char *buff, char *tokens[]) {
                   indicates end of tokens).
     */
     // Read input
-    int length = read(STDIN_FILENO, buff, COMMAND_LENGTH-1);
+    int length = (int)read(STDIN_FILENO, buff, COMMAND_LENGTH-1);
 
     if (length < 0) {
         perror("Unable to read command from keyboard. Terminating.\n");
@@ -153,6 +154,17 @@ int execInternalCommand(char *tokens[]) {
     return 0;
 }
 
+void callExecvp(const char *pathname, char *const *argv) {
+    if (execvp(pathname, argv) < 0) {
+        write(STDERR_FILENO, "Error code:", strlen("Error code:"));
+        char str[MAX_STRLEN];
+        snprintf(str, MAX_STRLEN, "%d", errno);
+        write(STDOUT_FILENO, str, strlen(str));
+        write(STDOUT_FILENO, "\n", 1);
+        exit(errno);
+    } else exit(0);
+}
+
 void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
     /*
         execCommand
@@ -182,7 +194,7 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
             return;
         } else if (pid == 0) {
             if (execInternalCommand(tokens) == 0)
-                execvp(tokens[0], tokens);
+                callExecvp(tokens[0], tokens);
             exit(0);
         } else {
             wait(NULL);
@@ -194,7 +206,7 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
             return;
         } else if (pid == 0) {
             if (execInternalCommand(tokens) == 0)
-                execvp(tokens[0], tokens);
+                callExecvp(tokens[0], tokens);
             exit(0);
         } else {
             write(STDOUT_FILENO, "[B] ", strlen("[B] "));
