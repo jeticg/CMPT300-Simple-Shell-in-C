@@ -212,14 +212,17 @@ void execCommand(char *tokens[]) {
         This function will process the tokens into different commmands and execute
         them by calling execSingleCommand.
 
+    */
+    // Sort out && symbols-
     char **startOfCommand = &tokens[0];
+
     for (int i=0; tokens[i] != NULL; i++) {
         if (strcmp(tokens[i], "&&") == 0) {
+            char **oldStartOfCommand = startOfCommand;
             startOfCommand = &tokens[i + 1];
             tokens[i] = NULL;
-
+            execSingleCommand(oldStartOfCommand, DIRECT_EXECUTION);
         }
     }
-    */
-    execSingleCommand(tokens, DIRECT_EXECUTION);
+    execSingleCommand(startOfCommand, DIRECT_EXECUTION);
 }
