@@ -154,6 +154,14 @@ void readCommand(char *buff, char *tokens[], _Bool *inBackground) {
 }
 
 int execInternalCommand(char *tokens[]) {
+    /*
+        execInternalCommand
+        Internal commands are executed here, including:
+            cd
+            pwd
+        exit code: 2, internal command recognised and executed.
+        exit code: 0, command is not internal command.
+    */
     if (tokens[0] == NULL) return 2;
     if (strcmp(tokens[0], "cd") == 0) {
         chdir(tokens[1]);
@@ -172,7 +180,16 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
     /*
         execCommand
         This function will execute a single command.
+        If the command is exit, it will be executed regardless of executionCode.
+        executionCode: DIRECT_EXECUTION, a new process will be created and
+                       executes the command.
+                       BACKGROUND_EXECUTION, the process will run in background
+                       with outputs on screen.
+                       BACKGROUND_NO_TRACE_EXECUTION, the process will run in
+                       background, totally ignored by shell instance.
     */
+    if (tokens == NULL || tokens[0] == NULL)
+        return;
     #ifdef DEBUG
     write(STDOUT_FILENO, "    Executing Single Command: ",
           strlen("    Executing Single Command: "));
@@ -208,13 +225,18 @@ void execCommand(char *tokens[]) {
     */
     // Sort out && symbols-
     char **startOfCommand = &tokens[0];
-
     for (int i=0; tokens[i] != NULL; i++) {
         if (strcmp(tokens[i], "&&") == 0) {
             char **oldStartOfCommand = startOfCommand;
             startOfCommand = &tokens[i + 1];
             tokens[i] = NULL;
             execSingleCommand(oldStartOfCommand, DIRECT_EXECUTION);
+        }
+        if (strcmp(tokens[i], "&") == 0) {
+            char **oldStartOfCommand = startOfCommand;
+            startOfCommand = &tokens[i + 1];
+            tokens[i] = NULL;
+            execSingleCommand(oldStartOfCommand, BACKGROUND_EXECUTION);
         }
     }
     execSingleCommand(startOfCommand, DIRECT_EXECUTION);
