@@ -170,10 +170,9 @@ int execInternalCommand(char *tokens[]) {
         return 2;
     }
     if (strcmp(tokens[0], "pwd") == 0) {
-        char *buff = NULL;
-        int size = -1;
-        getcwd(buff, size);
-        printf("%s %d", buff, size);
+        char *buff = getcwd(NULL, 0);
+        write(STDOUT_FILENO, buff, strnlen(buff, COMMAND_LENGTH));
+        write(STDOUT_FILENO, "\n", 1);
         return 2;
     }
     return 0;
