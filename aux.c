@@ -15,6 +15,8 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <limits.h>
+#include <signal.h>
+
 #ifdef CHICKEN
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -199,7 +201,15 @@ void clearBackgoundProcess() {
     while (head != NULL) {
         struct Node *tmp = head;
         head = head->next;
-        free(tmp);
+        if (tmp->value != 0) {
+            char str[MAX_STRLEN];
+            sprintf(str, "[%d] ", tmp->id);
+            write(STDOUT_FILENO, str, strlen(str));
+            sprintf(str, "%d: Killed\n", tmp->value);
+            write(STDOUT_FILENO, str, strlen(str));
+            kill(tmp->value, 9);
+            free(tmp);
+        }
     }
 }
 
