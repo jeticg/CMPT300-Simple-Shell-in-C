@@ -7,3 +7,4 @@
 #endif
 
 char* explainError(int errorCode);
+void printErrorMsg(int errorCode);

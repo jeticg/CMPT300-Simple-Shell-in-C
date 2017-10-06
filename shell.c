@@ -168,14 +168,7 @@ int execInternalCommand(char *tokens[]) {
 
 void callExecvp(const char *pathname, char *const *argv) {
     if (execvp(pathname, argv) < 0) {
-        write(STDERR_FILENO, "Error code ", strlen("Error code "));
-        char str[MAX_STRLEN];
-        snprintf(str, MAX_STRLEN, "%d", errno);
-        write(STDOUT_FILENO, str, strlen(str));
-        write(STDOUT_FILENO, ",", 1);
-        char *msg = explainError(errno);
-        write(STDOUT_FILENO, msg, strlen(msg));
-        write(STDOUT_FILENO, "\n", 1);
+        printErrorMsg(errno);
         exit(errno);
     } else exit(0);
 }
@@ -195,8 +188,8 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
     if (tokens == NULL || tokens[0] == NULL)
         return;
     #ifdef DEBUG
-    write(STDOUT_FILENO, "    Executing Single Command: ",
-          strlen("    Executing Single Command: "));
+    write(STDOUT_FILENO, "[DEBUG] Executing Single Command: ",
+          strlen("[DEBUG] Executing Single Command: "));
     write(STDOUT_FILENO, tokens[0], strlen(tokens[0]));
     write(STDOUT_FILENO, "\n", 1);
     #endif
@@ -206,7 +199,8 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
         if (execInternalCommand(tokens) == 2) return;
         int pid = fork();
         if (pid < 0) {
-            printf("Something is wrong. TAT\n");
+            write(STDOUT_FILENO, "Something is wrong. TAT\n",
+                  strlen("Something is wrong. TAT\n"));
             return;
         } else if (pid == 0) {
             callExecvp(tokens[0], tokens);
@@ -218,7 +212,8 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
         if (execInternalCommand(tokens) == 2) return;
         int pid = fork();
         if (pid < 0) {
-            printf("Something is wrong. TAT\n");
+            write(STDOUT_FILENO, "Something is wrong. TAT\n",
+                  strlen("Something is wrong. TAT\n"));
             return;
         } else if (pid == 0) {
             callExecvp(tokens[0], tokens);

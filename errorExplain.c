@@ -1,4 +1,14 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <string.h>
+#include <limits.h>
+
 #include "errorExplain.h"
+
+#define MAX_STRLEN ((CHAR_BIT * sizeof(int) - 1) / 3 + 2)
 
 
 char* explainError(int errorCode) {
@@ -53,76 +63,19 @@ char* explainError(int errorCode) {
 
     if (errorCode == ETXTBSY)
         return "Executable was open for writing by one or more processes";
+
+    if (errorCode == EBADF)
+        return "fd is not a valid file descriptor.";
     return "Unknown error code";
 }
-/*
-E2BIG
-The total number of bytes in the environment (envp) and argument list (argv) is too large.
 
-EACCES
-
-Search permission is denied on a component of the path prefix of filename or the name of a script interpreter. (See also path_resolution(7).)
-
-EACCES
-
-The file or a script interpreter is not a regular file.
-
-EACCES
-
-Execute permission is denied for the file or a script or ELF interpreter.
-
-EACCES
-
-The file system is mounted noexec.
-
-EFAULT
-
-filename points outside your accessible address space.
-
-EINVAL
-
-An ELF executable had more than one PT_INTERP segment (i.e., tried to name more than one interpreter).
-
-EIO
-
-An I/O error occurred.
-
-EISDIR
-
-An ELF interpreter was a directory.
-
-ELIBBAD
-An ELF interpreter was not in a recognized format.
-ELOOP
-Too many symbolic links were encountered in resolving filename or the name of a script or ELF interpreter.
-
-EMFILE
-
-The process has the maximum number of files open.
-
-ENAMETOOLONG
-filename is too long.
-ENFILE
-The system limit on the total number of open files has been reached.
-
-ENOENT
-
-The file filename or a script or ELF interpreter does not exist, or a shared library needed for file or interpreter cannot be found.
-
-ENOEXEC
-An executable is not in a recognized format, is for the wrong architecture, or has some other format error that means it cannot be executed.
-ENOMEM
-Insufficient kernel memory was available.
-
-ENOTDIR
-A component of the path prefix of filename or a script or ELF interpreter is not a directory.
-EPERM
-The file system is mounted nosuid, the user is not the superuser, and the file has the set-user-ID or set-group-ID bit set.
-
-EPERM
-
-The process is being traced, the user is not the superuser and the file has the set-user-ID or set-group-ID bit set.
-
-ETXTBSY
-Executable was open for writing by one or more processes.
-*/
+void printErrorMsg(int errorCode) {
+    write(STDERR_FILENO, "Error code ", strlen("Error code "));
+    char str[MAX_STRLEN];
+    snprintf(str, MAX_STRLEN, "%d", errorCode);
+    write(STDOUT_FILENO, str, strlen(str));
+    write(STDOUT_FILENO, ", ", 2);
+    char *msg = explainError(errorCode);
+    write(STDOUT_FILENO, msg, strlen(msg));
+    write(STDOUT_FILENO, "\n", 1);
+}
