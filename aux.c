@@ -199,6 +199,27 @@ void clearBackgoundProcess() {
     }
 }
 
+void printBackgoundProcess() {
+    watchBackgroundProcess();
+    struct Node *node = head, *list[10];
+    if (node == NULL) return;
+
+    for (int i=0; i<10; i++) list[i] = NULL;
+    for (int i=0; i<10 && node->next != NULL; i++) {
+        list[i] = node->next;
+        node = node->next;
+    }
+    for (int i=9; i>=0; i--) {
+        if (list[i] == NULL) continue;
+        char str[MAX_STRLEN];
+        sprintf(str, "[%d] ", list[i]->id);
+        write(STDOUT_FILENO, str, strlen(str));
+        sprintf(str, "%d", list[i]->value);
+        write(STDOUT_FILENO, str, strlen(str));
+        write(STDOUT_FILENO, "\n", 1);
+    }
+}
+
 
 void addHistory(char* buff) {
     #ifdef CHICKEN

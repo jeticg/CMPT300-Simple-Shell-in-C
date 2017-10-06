@@ -191,6 +191,10 @@ int execInternalCommand(char *tokens[]) {
         printHistory();
         return 2;
     }
+    if (strcmp(tokens[0], "subproc") == 0) {
+        printBackgoundProcess();
+        return 2;
+    }
     return 0;
 }
 
