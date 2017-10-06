@@ -15,6 +15,10 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <limits.h>
+#ifdef CHICKEN
+#include <readline/readline.h>
+#include <readline/history.h>
+#endif
 
 #include "aux.h"
 
@@ -192,6 +196,9 @@ void clearBackgoundProcess() {
 
 
 void addHistory(char* buff) {
+    #ifdef CHICKEN
+    add_history(buff);
+    #endif
     struct CharNode *newNode =
         (struct CharNode*)malloc(sizeof(struct CharNode));
     newNode->value = (char*)malloc(COMMAND_LENGTH * sizeof(char));
@@ -269,6 +276,21 @@ void clearHistory() {
     }
 }
 
+#ifdef CHICKEN
+int reader(void *buf, size_t nbyte) {
+    char *tmp = getcwd(NULL, 0);
+    char *buff = malloc(sizeof(char) * (strlen(tmp) + 3));
+    strcpy(buff, tmp);
+    buff[strlen(tmp) - 1] = ' ';
+    buff[strlen(tmp) + 0] = '>';
+    buff[strlen(tmp) + 1] = ' ';
+    buff[strlen(tmp) + 2] = '\0';
+    char *line = readline(buff);
+    strncpy(buf, line, nbyte);
+    free(buff);
+    return (int)strlen(buf);
+}
+#endif
 
 #ifdef ITTB
 
@@ -285,5 +307,6 @@ int main() {
     strcpy(buff, "afplay ~/Music/QQ音乐/CHEMISTRY-Now\ or\ Neve.mp3");
     expandHome(buff, 100);
     printf("%s\n", buff);
+    return 0;
 }
 #endif

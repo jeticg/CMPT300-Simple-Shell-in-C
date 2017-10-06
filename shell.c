@@ -34,9 +34,12 @@ int main() {
     while (true) {
         // Get command
         // Use write because we need to use read() to work with
+        #ifdef CHICKEN
+        #else
         char *buff = getcwd(NULL, 0);
         write(STDOUT_FILENO, buff, strlen(buff));
         write(STDOUT_FILENO, " > ", strlen(" > "));
+        #endif
         readCommand(inputBuffer, tokens);
 
         // DEBUG: Dump out arguments:
@@ -130,7 +133,11 @@ void readCommand(char *buff, char *tokens[]) {
                   NULL pointer indicates end of tokens).
     */
     // Read input
+    #ifdef CHICKEN
+    int length = reader(buff, COMMAND_LENGTH-1);
+    #else
     int length = (int)read(STDIN_FILENO, buff, COMMAND_LENGTH-1);
+    #endif
 
     if (length < 0) {
         perror("Unable to read command from keyboard. Terminating.\n");

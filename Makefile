@@ -4,7 +4,7 @@
 # Define what compiler to use and the flags.
 CC=cc
 CXX=CC
-CCFLAGS= -g -std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Werror -Wextra -Wconversion
+CCFLAGS= -g -std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Werror -Wextra -Wconversion -DCHICKEN
 
 all: shell shell_sol errorExplain
 
@@ -18,10 +18,10 @@ all: shell shell_sol errorExplain
 
 
 shell: shell.o errorExplain.o aux.o
-	$(CC) -o shell shell.o errorExplain.o aux.o $(CCFLAGS)
+	$(CC) -o shell shell.o errorExplain.o aux.o -lreadline $(CCFLAGS)
 
 shell_sol: shell_sol.o errorExplain.o aux.o
-	$(CC) -o shell_sol shell_sol.o errorExplain.o aux.o $(CCFLAGS)
+	$(CC) -o shell_sol shell_sol.o errorExplain.o aux.o -lreadline $(CCFLAGS)
 
 clean:
 	rm -f core *.o shell shell_sol
