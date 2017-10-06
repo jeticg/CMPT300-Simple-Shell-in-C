@@ -14,7 +14,7 @@
 // Constants
 #define COMMAND_LENGTH 1024
 #define NUM_TOKENS (COMMAND_LENGTH / 2 + 1)
-#define MAX_STRLEN ((CHAR_BIT * sizeof(int) - 1) / 3 + 2)
+#define MAX_STRLEN 1024
 
 // Command execution modes.
 #define EXECUTION_CODE int

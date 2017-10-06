@@ -17,7 +17,7 @@
 
 #include "errorExplain.h"
 
-#define MAX_STRLEN ((CHAR_BIT * sizeof(int) - 1) / 3 + 2)
+#define MAX_STRLEN 1024
 
 
 char* explainError(int errorCode) {

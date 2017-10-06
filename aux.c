@@ -24,7 +24,7 @@
 
 // DEFINE
 #define COMMAND_LENGTH 1024
-#define MAX_STRLEN ((CHAR_BIT * sizeof(int) - 1) / 3 + 2)
+#define MAX_STRLEN 1024
 
 // struct
 struct Node {
@@ -177,8 +177,12 @@ void watchBackgroundProcess() {
     struct Node *node = head;
     if (head == NULL) return;
     while (node->next != NULL) {
-        if (waitpid(node->next->value, NULL, WNOHANG) > 0) {
-            printf("[%d] %d Done\n", node->next->id, node->next->value);
+        int status;
+        if (waitpid(node->next->value, &status, WNOHANG) > 0) {
+            char str[MAX_STRLEN];
+            sprintf(str, "[%d] %d Done(%d)\n",
+                node->next->id, node->next->value, status);
+            write(STDOUT_FILENO, str, strlen(str));
             node->next = node->next->next;
         } else {
             node = node->next;
