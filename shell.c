@@ -91,14 +91,13 @@ int tokeniseCommand(char *buff, char *tokens[]) {
         addHistory(buff);
     expandHome(buff, COMMAND_LENGTH);
     numChars = (int)strnlen(buff, COMMAND_LENGTH);
-    for (int i = 0; i < numChars; i++) {
+    for (int i = 0; i <= numChars; i++) {
         switch (buff[i]) {
             // Handle token delimiters (ends):
             case '\\':
                 // Handle special characters to allow spaces among tokens
                 if (i + 1 < numChars) {
-                    for (int j = i; j < numChars; j++)
-                        buff[j] = buff[j + 1];
+                    for (int j=i; j<numChars; j++) buff[j] = buff[j+1];
                     numChars--;
                     break;
                 }
@@ -112,25 +111,23 @@ int tokeniseCommand(char *buff, char *tokens[]) {
                 break;
 
             case '\"':
-                if (einfacheAZ == false) {
-                    if (doppelteAZ == false) doppelteAZ = true;
-                    else doppelteAZ = false;
-                    for (int j = i; j < numChars; j++)
-                        buff[j] = buff[j + 1];
-                    numChars--;
-                    i--;
-                    break;
-                }
+                if (buff[i] == '\"')
+                    if (einfacheAZ == false) {
+                        if (doppelteAZ == false) doppelteAZ = true;
+                        else doppelteAZ = false;
+                        for (int j=i; j<numChars; j++) buff[j] = buff[j+1];
+                        numChars--; i--;
+                        break;
+                    }
             case '\'':
-                if (doppelteAZ == false) {
-                    if (einfacheAZ == false) einfacheAZ = true;
-                    else einfacheAZ = false;
-                    for (int j = i; j < numChars; j++)
-                        buff[j] = buff[j + 1];
-                    numChars--;
-                    i--;
-                    break;
-                }
+                if (buff[i] == '\'')
+                    if (doppelteAZ == false) {
+                        if (einfacheAZ == false) einfacheAZ = true;
+                        else einfacheAZ = false;
+                        for (int j=i; j<numChars; j++) buff[j] = buff[j+1];
+                        numChars--; i--;
+                        break;
+                    }
 
 
             // Handle other characters (may be start)
