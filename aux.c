@@ -106,7 +106,7 @@ void expandHome(char *buff, int maxLen) {
                 homedir = "";
             int homedirLen = (int)strnlen(homedir, (size_t)maxLen);
 
-            // Safety check: result not exceed maximum command length
+            // Safety check: result not exceed maxLen
             if (numChars - 1 + homedirLen >= maxLen) {
                 buff[0] = '\0';
                 write(STDOUT_FILENO,
@@ -137,14 +137,14 @@ void expandEvent(char *buff, int maxLen) {
         if (buff[i] == '!' && i + 1 < numChars &&
                 (i == 0 || buff[i-1] != '\\')) {
 
-            char *tmp = (char*)malloc((unsigned long)maxLen * sizeof(char));
+            char *event = (char*)malloc((unsigned long)maxLen * sizeof(char));
             int oriSize = 0;
             int shift = 0;
 
             if (buff[i + 1] == '!') {
                 // Previous command
                 oriSize = 2;
-                getLastHistory(tmp);
+                getLastHistory(event);
 
             } else {
                 // selected command
@@ -160,18 +160,28 @@ void expandEvent(char *buff, int maxLen) {
                 if (oriSize == 1) {
                     write(STDOUT_FILENO, "-shell: event not found\n",
                         strlen("-shell: event not found\n"));
-                    strcpy(buff, "");
-                    free(tmp);
+                    buff[0] = '\0';
+                    free(event);
                     return;
                 }
-                getHistory(sum, tmp);
-                if (strcmp(tmp, "") == 0) {
+                getHistory(sum, event);
+                if (strcmp(event, "") == 0) {
                     write(STDOUT_FILENO, "-shell: event not found\n",
                         strlen("-shell: event not found\n"));
-                    strcpy(buff, "");
-                    free(tmp);
+                    buff[0] = '\0';
+                    free(event);
                     return;
                 }
+            }
+
+            int eventLen = (int)strnlen(event, (size_t)maxLen);
+            // Safety check: result must not exceed maxLen
+            if (numChars - oriSize + eventLen >= maxLen) {
+                buff[0] = '\0';
+                write(STDOUT_FILENO,
+                    "-shell: command exceeded maximum length\n",
+                    strlen("-shell: command exceeded maximum length\n"));
+                return;
             }
 
             // Shift buff (left)
@@ -181,18 +191,18 @@ void expandEvent(char *buff, int maxLen) {
             numChars-=shift;
 
             // shift buff (right)
-            shift = (int)strlen(tmp);
+            shift = eventLen;
             for (int j=numChars; j>=i; j--) {
                 buff[j + shift] = buff[j];
             }
             numChars+=shift;
 
             // copy
-            for (int j=0; j<(int)strlen(tmp); j++)
-                buff[i + j] = tmp[j];
+            for (int j=0; j<eventLen; j++)
+                buff[i + j] = event[j];
 
 
-            free(tmp);
+            free(event);
         }
     }
 }
