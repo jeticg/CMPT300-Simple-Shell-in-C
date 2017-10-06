@@ -181,8 +181,12 @@ void watchBackgroundProcess() {
         int status;
         if (waitpid(node->next->value, &status, WNOHANG) > 0) {
             char str[MAX_STRLEN];
-            sprintf(str, "[%d] %d Done(%d)\n",
-                node->next->id, node->next->value, status);
+            if (status != 0)
+                sprintf(str, "[%d] %d: Terminated: %d\n",
+                    node->next->id, node->next->value, status);
+            else
+            sprintf(str, "[%d] %d: Done\n",
+                node->next->id, node->next->value);
             write(STDOUT_FILENO, str, strlen(str));
             node->next = node->next->next;
         } else {
