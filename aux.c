@@ -87,6 +87,14 @@ void watchBackgroundProcess() {
     }
 }
 
+void clearBackgoundProcess() {
+    while (head != NULL) {
+        struct Node *tmp = head;
+        head = head->next;
+        free(tmp);
+    }
+}
+
 #ifdef ITTB
 
 int main() {

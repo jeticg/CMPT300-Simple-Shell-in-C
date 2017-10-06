@@ -104,6 +104,7 @@ int tokeniseCommand(char *buff, char *tokens[]) {
 }
 
 void coreExit() {
+    clearBackgoundProcess();
     exit(0);
 }
 
