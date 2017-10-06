@@ -79,7 +79,6 @@ int tokeniseCommand(char *buff, char *tokens[]) {
                     for (int j = i; j < numChars; j++)
                         buff[j] = buff[j + 1];
                     numChars--;
-                    i++;
                     break;
                 }
             case ' ':
