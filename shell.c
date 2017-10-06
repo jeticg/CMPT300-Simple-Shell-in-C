@@ -143,12 +143,6 @@ int tokeniseCommand(char *buff, char *tokens[]) {
     return tokenCount;
 }
 
-void coreExit() {
-    clearBackgoundProcess();
-    clearHistory();
-    exit(0);
-}
-
 void readCommand(char *buff, char *tokens[]) {
     /*
         Read a command from the keyboard into the buffer 'buff' and Tokenise it
@@ -183,6 +177,19 @@ void readCommand(char *buff, char *tokens[]) {
     if (tokenCount == 0) {
         return;
     }
+}
+
+void coreExit() {
+    clearBackgoundProcess();
+    clearHistory();
+    exit(0);
+}
+
+void callExecvp(const char *pathname, char *const *argv) {
+    if (execvp(pathname, argv) < 0) {
+        printErrorMsg(errno);
+        exit(errno);
+    } else exit(0);
 }
 
 int execInternalCommand(char *tokens[]) {
@@ -220,13 +227,6 @@ int execInternalCommand(char *tokens[]) {
         return 2;
     }
     return 0;
-}
-
-void callExecvp(const char *pathname, char *const *argv) {
-    if (execvp(pathname, argv) < 0) {
-        printErrorMsg(errno);
-        exit(errno);
-    } else exit(0);
 }
 
 void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
