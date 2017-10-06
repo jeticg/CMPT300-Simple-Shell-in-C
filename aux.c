@@ -281,10 +281,10 @@ int reader(void *buf, size_t nbyte) {
     char *tmp = getcwd(NULL, 0);
     char *buff = malloc(sizeof(char) * (strlen(tmp) + 3));
     strcpy(buff, tmp);
-    buff[strlen(tmp) - 1] = ' ';
-    buff[strlen(tmp) + 0] = '>';
-    buff[strlen(tmp) + 1] = ' ';
-    buff[strlen(tmp) + 2] = '\0';
+    buff[strlen(tmp) + 0] = ' ';
+    buff[strlen(tmp) + 1] = '>';
+    buff[strlen(tmp) + 2] = ' ';
+    buff[strlen(tmp) + 3] = '\0';
     char *line = readline(buff);
     strncpy(buf, line, nbyte);
     free(buff);
