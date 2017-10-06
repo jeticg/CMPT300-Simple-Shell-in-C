@@ -75,6 +75,7 @@ int tokeniseCommand(char *buff, char *tokens[]) {
     */
     int tokenCount = 0;
     _Bool inToken = false;
+    expandEvent(buff, COMMAND_LENGTH);
     int numChars = (int)strnlen(buff, COMMAND_LENGTH);
     if (numChars > 0)
         addHistory(buff);

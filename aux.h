@@ -11,12 +11,14 @@
 #ifndef JETIC_SHELL_AUX
 
 void expandHome(char *buff, int maxLen);
+void expandEvent(char *buff, int maxLen);
 
 void watchBackgroundProcess();
 void addBackgroundProcess(int pid);
 void clearBackgoundProcess();
 
 void getHistory(int id, char* buff);
+void getLastHistory(char* buff);
 void addHistory(char* buff);
 void printHistory();
 void clearHistory();

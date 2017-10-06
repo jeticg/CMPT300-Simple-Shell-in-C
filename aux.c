@@ -73,6 +73,57 @@ void expandHome(char *buff, int maxLen) {
     }
 }
 
+void expandEvent(char *buff, int maxLen) {
+    /*
+    This function expands the '!'(event)s in a command(buff).
+    */
+    int numChars = (int)strnlen(buff, (size_t)maxLen);
+
+    for (int i = 0; i < numChars; i++) {
+
+        if (buff[i] == '!' && i + 1 < numChars &&
+                (i == 0 || buff[i-1] != '\\')) {
+
+            char *tmp = (char*)malloc((unsigned long)maxLen * sizeof(char));
+            int oriSize = 0;
+            int shift = 0;
+
+            if (buff[i + 1] == '!') {
+                // Previous command
+                oriSize = 2;
+                getLastHistory(tmp);
+
+            } else {
+                // selected command
+                int j = i;
+                while (j < numChars && '0' <= buff[j] && buff[j] <= '9') j++;
+                oriSize = 1;
+                strcpy(tmp, "");
+            }
+
+            // Shift buff (left)
+            shift = oriSize;
+            for (int j = i; j + shift <= numChars; j++)
+                buff[j] = buff[j + shift];
+            numChars-=shift;
+
+            // shift buff (right)
+            shift = (int)strlen(tmp);
+            for (int j=numChars; j>=i; j--) {
+                buff[j + shift] = buff[j];
+            }
+            numChars+=shift;
+
+            // copy
+            for (int j=0; j<(int)strlen(tmp); j++)
+                buff[i + j] = tmp[j];
+
+
+            free(tmp);
+        }
+    }
+}
+
 void addBackgroundProcess(int pid) {
     struct Node *newNode = (struct Node*)malloc(sizeof(struct Node));
     newNode->value = pid;
@@ -142,6 +193,12 @@ void addHistory(char* buff) {
     newNode->id = historyHead->id;
 }
 
+void getLastHistory(char* buff) {
+    if (historyHead != NULL && historyHead->next != NULL)
+        strcpy(buff, historyHead->next->value);
+    else
+        strcpy(buff, "");
+}
 
 void printHistory() {
     struct CharNode *node = historyHead, *list[10];
@@ -155,8 +212,10 @@ void printHistory() {
     for (int i=9; i>=0; i--) {
         if (list[i] == NULL) continue;
         char str[MAX_STRLEN];
-        sprintf(str, "%d\t%s\n", list[i]->id, list[i]->value);
+        sprintf(str, "%d\t", list[i]->id);
         write(STDOUT_FILENO, str, strlen(str));
+        write(STDOUT_FILENO, list[i]->value, strlen(list[i]->value));
+        write(STDOUT_FILENO, "\n", 1);
     }
 }
 
@@ -164,6 +223,8 @@ void clearHistory() {
     while (historyHead != NULL) {
         struct CharNode *tmp = historyHead;
         historyHead = historyHead->next;
+        if (tmp->value != NULL)
+            free(tmp->value);
         free(tmp);
     }
 }
