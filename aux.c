@@ -138,7 +138,6 @@ void expandEvent(char *buff, int maxLen) {
                         '0' <= buff[i + oriSize] &&
                         buff[i + oriSize] <= '9') {
                     sum = sum * 10 + (int)(buff[i + oriSize] - '0');
-                    printf("%d %d %d\n", buff[i + oriSize], '0', '9');
                     oriSize++;
                 }
                 if (oriSize == 1) {
