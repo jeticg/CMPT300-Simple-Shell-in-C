@@ -16,10 +16,10 @@ void watchBackgroundProcess();
 void addBackgroundProcess(int pid);
 void clearBackgoundProcess();
 
-void getHistory();
-void addHistory(int id, char* buff);
+void getHistory(int id, char* buff);
+void addHistory(char* buff);
 void printHistory();
-void runHistory(int id, char* buff);
+void clearHistory();
 
 #define JETIC_SHELL_AUX
 #endif

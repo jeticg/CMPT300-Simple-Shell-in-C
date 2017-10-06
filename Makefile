@@ -4,7 +4,7 @@
 # Define what compiler to use and the flags.
 CC=cc
 CXX=CC
-CCFLAGS= -g -std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Werror -Wextra -Wconversion -DDEBUG
+CCFLAGS= -g -std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Werror -Wextra -Wconversion
 
 all: shell shell_sol errorExplain
 

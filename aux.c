@@ -19,6 +19,7 @@
 #include "aux.h"
 
 // DEFINE
+#define COMMAND_LENGTH 1024
 #define MAX_STRLEN ((CHAR_BIT * sizeof(int) - 1) / 3 + 2)
 
 // struct
@@ -34,7 +35,20 @@ struct Node {
     int value;
     int id;
     struct Node *next;
-} *head;
+} *head=NULL;
+
+struct CharNode {
+    /*
+        CharNode
+        This struct is a linked list for storing history information.
+
+        value: string
+        next: linked list next node
+    */
+    char *value;
+    int id;
+    struct CharNode *next;
+} *historyHead=NULL;
 
 void expandHome(char *buff, int maxLen) {
     /*
@@ -79,7 +93,7 @@ void addBackgroundProcess(int pid) {
     }
     newNode->id = head->id;
     char str[MAX_STRLEN];
-    snprintf(str, MAX_STRLEN, "[%d] %d\n", newNode->id, pid);
+    sprintf(str, "[%d] %d\n", newNode->id, pid);
     write(STDOUT_FILENO, str, strlen(str));
 }
 
@@ -103,6 +117,57 @@ void clearBackgoundProcess() {
         free(tmp);
     }
 }
+
+
+void addHistory(char* buff) {
+    struct CharNode *newNode =
+        (struct CharNode*)malloc(sizeof(struct CharNode));
+    newNode->value = (char*)malloc(COMMAND_LENGTH * sizeof(char));
+    strcpy(newNode->value, buff);
+    newNode->next = NULL;
+    if (historyHead == NULL) {
+        historyHead = (struct CharNode*)malloc(sizeof(struct CharNode));
+        historyHead->next = NULL;
+        historyHead->id = 0;
+        historyHead->value = 0;
+    }
+    if (historyHead->next == NULL) {
+        historyHead->id = 1;
+        historyHead->next = newNode;
+    } else {
+        historyHead->id += 1;
+        newNode->next = historyHead->next;
+        historyHead->next = newNode;
+    }
+    newNode->id = historyHead->id;
+}
+
+
+void printHistory() {
+    struct CharNode *node = historyHead, *list[10];
+    if (node == NULL) return;
+
+    for (int i=0; i<10; i++) list[i] = NULL;
+    for (int i=0; i<10 && node->next != NULL; i++) {
+        list[i] = node->next;
+        node = node->next;
+    }
+    for (int i=9; i>=0; i--) {
+        if (list[i] == NULL) continue;
+        char str[MAX_STRLEN];
+        sprintf(str, "%d\t%s\n", list[i]->id, list[i]->value);
+        write(STDOUT_FILENO, str, strlen(str));
+    }
+}
+
+void clearHistory() {
+    while (historyHead != NULL) {
+        struct CharNode *tmp = historyHead;
+        historyHead = historyHead->next;
+        free(tmp);
+    }
+}
+
 
 #ifdef ITTB
 

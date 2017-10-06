@@ -34,7 +34,6 @@ int main() {
     while (true) {
         // Get command
         // Use write because we need to use read() to work with
-        // signals, and read() is incompatible with printf().
         char *buff = getcwd(NULL, 0);
         write(STDOUT_FILENO, buff, strlen(buff));
         write(STDOUT_FILENO, " > ", strlen(" > "));
@@ -77,6 +76,8 @@ int tokeniseCommand(char *buff, char *tokens[]) {
     int tokenCount = 0;
     _Bool inToken = false;
     int numChars = (int)strnlen(buff, COMMAND_LENGTH);
+    if (numChars > 0)
+        addHistory(buff);
     expandHome(buff, COMMAND_LENGTH);
     numChars = (int)strnlen(buff, COMMAND_LENGTH);
     for (int i = 0; i < numChars; i++) {
@@ -112,6 +113,7 @@ int tokeniseCommand(char *buff, char *tokens[]) {
 
 void coreExit() {
     clearBackgoundProcess();
+    clearHistory();
     exit(0);
 }
 
@@ -123,8 +125,8 @@ void readCommand(char *buff, char *tokens[]) {
         buff: Buffer allocated by the calling code. Must be at least
               COMMAND_LENGTH bytes long.
         tokens[]: Array of character pointers which point into 'buff'. Must be
-                  at least NUM_TOKENS long. Tokens will be NULL terminated (a NULL pointer
-                  indicates end of tokens).
+                  at least NUM_TOKENS long. Tokens will be NULL terminated (a
+                  NULL pointer indicates end of tokens).
     */
     // Read input
     int length = (int)read(STDIN_FILENO, buff, COMMAND_LENGTH-1);
@@ -173,6 +175,10 @@ int execInternalCommand(char *tokens[]) {
         write(STDOUT_FILENO, "\n", 1);
         return 2;
     }
+    if (strcmp(tokens[0], "history") == 0) {
+        printHistory();
+        return 2;
+    }
     return 0;
 }
 
@@ -186,8 +192,9 @@ void callExecvp(const char *pathname, char *const *argv) {
 void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
     /*
         execCommand
-        This function will execute a single command.
-        If the command is exit, it will be executed regardless of executionCode.
+        This function will execute a single command. If the command is exit, it
+        will be executed regardless of executionCode.
+
         executionCode: DIRECT_EXECUTION, a new process will be created and
                        executes the command.
                        BACKGROUND_EXECUTION, the process will run in background
@@ -240,8 +247,8 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
 void execCommand(char *tokens[]) {
     /*
         execCommand
-        This function will process the tokens into different commmands and execute
-        them by calling execSingleCommand.
+        This function will process the tokens into different commmands and
+        execute them by calling execSingleCommand.
     */
     // Sort out && symbols
     watchBackgroundProcess();

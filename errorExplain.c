@@ -81,7 +81,7 @@ char* explainError(int errorCode) {
 void printErrorMsg(int errorCode) {
     write(STDERR_FILENO, "Error code ", strlen("Error code "));
     char str[MAX_STRLEN];
-    snprintf(str, MAX_STRLEN, "%d", errorCode);
+    sprintf(str, "%d", errorCode);
     write(STDOUT_FILENO, str, strlen(str));
     write(STDOUT_FILENO, ", ", 2);
     char *msg = explainError(errorCode);
