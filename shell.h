@@ -22,9 +22,6 @@
 #define BACKGROUND_EXECUTION 0002
 #define BACKGROUND_NO_TRACE_EXECUTION 0003
 
-#define JETIC_SHELL
-#endif
-
 // Functions
 int tokeniseCommand(char *buff, char *tokens[]);
 void readCommand(char *buff, char *tokens[]);
@@ -33,3 +30,6 @@ void callExecvp(const char *pathname, char *const *argv);
 void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode);
 void execCommand(char *tokens[]);
 void coreExit();
+
+#define JETIC_SHELL
+#endif
