@@ -28,7 +28,9 @@ int main() {
         // Get command
         // Use write because we need to use read() to work with
         // signals, and read() is incompatible with printf().
-        write(STDOUT_FILENO, "> ", strlen("> "));
+        char *buff = getcwd(NULL, 0);
+        write(STDOUT_FILENO, buff, strlen(buff));
+        write(STDOUT_FILENO, " > ", strlen(" > "));
         readCommand(inputBuffer, tokens);
 
         // DEBUG: Dump out arguments:
