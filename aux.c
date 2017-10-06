@@ -21,6 +21,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <pwd.h>
 #include <limits.h>
 #include <signal.h>
@@ -28,6 +29,7 @@
 #ifdef CHICKEN
 #include <readline/readline.h>
 #include <readline/history.h>
+//#include <readline/signals.h>
 int READING = 0;
 #endif
 
@@ -123,7 +125,7 @@ void expandHome(char *buff, int maxLen) {
                 buff[numChars + homedirLen - 1 - j] =  buff[numChars - j];
             }
             numChars--;
-            numChars+=strlen(homedir);
+            numChars+=homedirLen;
             for (int j=0; j<homedirLen; j++)
                 buff[i + j] = homedir[j];
         }

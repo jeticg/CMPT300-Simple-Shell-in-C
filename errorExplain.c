@@ -193,9 +193,6 @@ char* explainError(int errorCode) {
         case ENOTSOCK:
             return "Not a socket.";
 
-        case ENOTSUP:
-            return "Operation not supported.";
-
         case ENOTTY:
             return "Inappropriate I/O control operation.";
 

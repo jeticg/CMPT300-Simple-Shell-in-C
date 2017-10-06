@@ -16,7 +16,9 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <pwd.h>
+#include <signal.h>
 
 #include "errorExplain.h"
 #include "aux.h"
@@ -193,6 +195,8 @@ void coreExit() {
 
 void callExecvp(const char *pathname, char *const *argv) {
     if (execvp(pathname, argv) < 0) {
+        write(STDOUT_FILENO, pathname, strlen(pathname));
+        write(STDOUT_FILENO, ": ", strlen(": "));
         printErrorMsg(errno);
         exit(errno);
     } else exit(0);
@@ -210,18 +214,29 @@ int execInternalCommand(char *tokens[]) {
     if (tokens == NULL || tokens[0] == NULL) return 2;
     if (strcmp(tokens[0], "cd") == 0) {
         if (tokens[1] != NULL) {
-            if (chdir(tokens[1]) != 0) printErrorMsg(errno);
+            if (chdir(tokens[1]) != 0) {
+                write(STDOUT_FILENO, "-shell: cd: ", strlen("-shell: cd: "));
+                printErrorMsg(errno);
+            }
         } else {
             struct passwd *pw = getpwuid(getuid());
             char *homedir = pw->pw_dir;
-            if (chdir(homedir) != 0) printErrorMsg(errno);
+            if (chdir(homedir) != 0) {
+                write(STDOUT_FILENO, "-shell: cd: ", strlen("-shell: cd: "));
+                printErrorMsg(errno);
+            }
         }
         return 2;
     }
     if (strcmp(tokens[0], "pwd") == 0) {
         char *buff = getcwd(NULL, 0);
-        write(STDOUT_FILENO, buff, strlen(buff));
-        write(STDOUT_FILENO, "\n", 1);
+        if (buff == NULL) {
+            write(STDOUT_FILENO, "-shell: pwd: ", strlen("-shell: pwd: "));
+            printErrorMsg(errno);
+        } else {
+            write(STDOUT_FILENO, buff, strlen(buff));
+            write(STDOUT_FILENO, "\n", 1);
+        }
         return 2;
     }
     if (strcmp(tokens[0], "history") == 0) {
@@ -327,4 +342,5 @@ void signalHandler(int signum) {
         }
         #endif
     }
+    else exit(signum);
 }
