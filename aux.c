@@ -7,6 +7,14 @@
     Student ID: 301295754
     I wanna wanna Chicken Nuggets.
 */
+/*
+    So what on earth is CHICKEN option?
+    CHICKEN allows one to utilise readline to read from keyboard. There are
+    many reasons to why one would want to do this, but in short, it allows easy
+    auto-completion(not perfect, sometimes doesn't work) and arrow keys for
+    editing. Although one could implement ones own, it is time consuming and
+    not worthwhile.
+*/
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -57,6 +65,27 @@ struct CharNode {
     struct CharNode *next;
 } *historyHead=NULL;
 
+
+// Internal Functions
+struct Node *NewNode() {
+    struct Node *newNode =
+        (struct Node*)malloc(sizeof(struct Node));
+    newNode->id = 0;
+    newNode->value = 0;
+    newNode->next = NULL;
+    return newNode;
+}
+struct CharNode *NewCharNode() {
+    struct CharNode *newNode =
+        (struct CharNode*)malloc(sizeof(struct CharNode));
+    newNode->id = 0;
+    newNode->value = NULL;
+    newNode->next = NULL;
+    return newNode;
+}
+
+
+// Functions
 void expandHome(char *buff, int maxLen) {
     /*
     This function expands the '~'s in a command(buff). It allows commands to
@@ -152,61 +181,89 @@ void expandEvent(char *buff, int maxLen) {
     }
 }
 
+
 void addBackgroundProcess(int pid) {
-    struct Node *newNode = (struct Node*)malloc(sizeof(struct Node));
-    newNode->value = pid;
-    newNode->next = NULL;
-    if (head == NULL) {
-        head = (struct Node*)malloc(sizeof(struct Node));
-        head->next = NULL;
-        head->id = 0;
-        head->value = 0;
-    }
+    /*
+    This function adds the pid of a process to the watch list.
+    */
+
+    // Parameter check
+    if (pid <= 0) return;
+    // Check if pid given exists.
+    if (getpgid(pid) < 0) return;
+
+
+    struct Node *newNode = NewNode();
+
+    if (head == NULL) head = NewNode();
+
     if (head->next == NULL) {
         head->id = 1;
-        head->next = newNode;
     } else {
         head->id += 1;
         newNode->next = head->next;
-        head->next = newNode;
     }
+
+    head->next = newNode;
+
     newNode->id = head->id;
+
     char str[MAX_STRLEN];
     sprintf(str, "[%d] %d\n", newNode->id, pid);
     write(STDOUT_FILENO, str, strlen(str));
 }
 
 void watchBackgroundProcess() {
+    /*
+    This function checks the status of processes in the watch list.
+    */
     struct Node *node = head;
     if (head == NULL) return;
+
     while (node->next != NULL) {
         int status;
+        struct Node *tmp;
+
         if (waitpid(node->next->value, &status, WNOHANG) > 0) {
+            // Triggers when process have ended
             char str[MAX_STRLEN];
             if (status != 0)
                 sprintf(str, "[%d] %d: Terminated: %d\n",
                     node->next->id, node->next->value, status);
             else
-            sprintf(str, "[%d] %d: Done\n",
-                node->next->id, node->next->value);
+                sprintf(str, "[%d] %d: Done\n",
+                    node->next->id, node->next->value);
             write(STDOUT_FILENO, str, strlen(str));
-            node->next = node->next->next;
+
+            // Remove node
+            tmp = node->next;
+            node->next = tmp->next;
+            free(tmp);
+
         } else {
+            // All is well, move on to the next
             node = node->next;
         }
     }
 }
 
 void clearBackgoundProcess() {
+    /*
+    This function kills all processes in the watch list and clear the list.
+    */
+    watchBackgroundProcess();
     while (head != NULL) {
         struct Node *tmp = head;
         head = head->next;
         if (tmp->value != 0) {
+            // Print kill message
             char str[MAX_STRLEN];
             sprintf(str, "[%d] ", tmp->id);
             write(STDOUT_FILENO, str, strlen(str));
             sprintf(str, "%d: Killed\n", tmp->value);
             write(STDOUT_FILENO, str, strlen(str));
+
+            // perform the kill
             kill(tmp->value, 9);
             free(tmp);
         }
@@ -214,17 +271,29 @@ void clearBackgoundProcess() {
 }
 
 void printBackgoundProcess() {
+    /*
+    This function prints the watch list. Only the last 10 commands will be
+    printed.
+    */
     watchBackgroundProcess();
     struct Node *node = head, *list[10];
     if (node == NULL) return;
 
+    // Initialise print list to all NULL
     for (int i=0; i<10; i++) list[i] = NULL;
+
+    // Fill the list
     for (int i=0; i<10 && node->next != NULL; i++) {
         list[i] = node->next;
         node = node->next;
     }
+
+    // Print
     for (int i=9; i>=0; i--) {
+        // Ignore empty entries
         if (list[i] == NULL) continue;
+
+        // Print entry
         char str[MAX_STRLEN];
         sprintf(str, "[%d] ", list[i]->id);
         write(STDOUT_FILENO, str, strlen(str));
@@ -235,40 +304,58 @@ void printBackgoundProcess() {
 }
 
 
+// History
 void addHistory(char* buff) {
+    /*
+    This function adds buff to the history list. Buff is a string.
+    The important thing here is that this function is not limited by the length
+    of buff, as memories are dynamically allocated.
+    */
+    // Parameter check
+    if (buff == NULL) return;
+    if (buff[0] == '\0') return;
+    // Safety check (#1)
+    if (strlen(buff) > COMMAND_LENGTH) return;
+
     #ifdef CHICKEN
     add_history(buff);
     #endif
-    struct CharNode *newNode =
-        (struct CharNode*)malloc(sizeof(struct CharNode));
-    newNode->value = (char*)malloc(COMMAND_LENGTH * sizeof(char));
+
+    struct CharNode *newNode = NewCharNode();
+    newNode->value = (char*)malloc((strlen(buff) + 1) * sizeof(char));
     strcpy(newNode->value, buff);
-    newNode->next = NULL;
-    if (historyHead == NULL) {
-        historyHead = (struct CharNode*)malloc(sizeof(struct CharNode));
-        historyHead->next = NULL;
-        historyHead->id = 0;
-        historyHead->value = 0;
-    }
+
+    if (historyHead == NULL) historyHead = NewCharNode();
+
     if (historyHead->next == NULL) {
         historyHead->id = 1;
-        historyHead->next = newNode;
     } else {
         historyHead->id += 1;
         newNode->next = historyHead->next;
-        historyHead->next = newNode;
     }
+
+    historyHead->next = newNode;
     newNode->id = historyHead->id;
 }
 
 void getLastHistory(char* buff) {
-    if (historyHead != NULL && historyHead->next != NULL)
-        strcpy(buff, historyHead->next->value);
+    /*
+    This function prints the last command to buff. It calls getHistory to make
+    it work.
+    */
+    // (#1)
+    if (historyHead == NULL || historyHead->next == NULL)
+        // Parameter check
+        getHistory(-1, buff);
     else
-        strcpy(buff, "");
+        getHistory(historyHead->next->id, buff);
 }
 
 void getHistory(int id, char* buff) {
+    /*
+    This function returns the command matching id. Might not be very saft to
+    use strcpy though.
+    */
     if (historyHead == NULL || historyHead->next == NULL) {
         strcpy(buff, "");
         return;
@@ -288,16 +375,26 @@ void getHistory(int id, char* buff) {
 }
 
 void printHistory() {
+    /*
+    This function prints last 10 lines in history.
+    */
     struct CharNode *node = historyHead, *list[10];
     if (node == NULL) return;
 
+    // Fill list with NULL
     for (int i=0; i<10; i++) list[i] = NULL;
+
+    // Fill nodes with history
     for (int i=0; i<10 && node->next != NULL; i++) {
         list[i] = node->next;
         node = node->next;
     }
+
+    // Print
     for (int i=9; i>=0; i--) {
+        // Ignore NULL entries
         if (list[i] == NULL) continue;
+        // Actual print
         char str[MAX_STRLEN];
         sprintf(str, "%d\t", list[i]->id);
         write(STDOUT_FILENO, str, strlen(str));
@@ -307,6 +404,9 @@ void printHistory() {
 }
 
 void clearHistory() {
+    /*
+    This function clears all history records.
+    */
     while (historyHead != NULL) {
         struct CharNode *tmp = historyHead;
         historyHead = historyHead->next;
