@@ -91,6 +91,10 @@ void expandHome(char *buff, int maxLen) {
     This function expands the '~'s in a command(buff). It allows commands to
     use '~' to indicate home directory.
     */
+    // Parameter check
+    if (buff == NULL) return;
+
+
     int numChars = (int)strnlen(buff, (size_t)maxLen);
 
     for (int i = 0; i < numChars; i++) {
@@ -130,6 +134,10 @@ void expandEvent(char *buff, int maxLen) {
     /*
     This function expands the '!'(event)s in a command(buff).
     */
+    // Parameter check
+    if (buff == NULL) return;
+
+
     int numChars = (int)strnlen(buff, (size_t)maxLen);
 
     for (int i = 0; i < numChars; i++) {
