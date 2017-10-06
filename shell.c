@@ -89,6 +89,11 @@ int tokeniseCommand(char *buff, char *tokens[]) {
     int numChars = (int)strnlen(buff, COMMAND_LENGTH);
     if (numChars > 0)
         addHistory(buff);
+    else {
+        // Length = 0;
+        tokens[0] = NULL;
+        return 0;
+    }
     expandHome(buff, COMMAND_LENGTH);
     numChars = (int)strnlen(buff, COMMAND_LENGTH);
     for (int i = 0; i <= numChars; i++) {

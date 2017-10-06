@@ -420,15 +420,27 @@ void clearHistory() {
 int reader(void *buf, size_t nbyte) {
     READING = 1;
     char *tmp = getcwd(NULL, 0);
-    char *buff = malloc(sizeof(char) * (strlen(tmp) + 3));
-    strcpy(buff, tmp);
-    buff[strlen(tmp) + 0] = ' ';
-    buff[strlen(tmp) + 1] = '>';
-    buff[strlen(tmp) + 2] = ' ';
-    buff[strlen(tmp) + 3] = '\0';
-    char *line = readline(buff);
-    strncpy(buf, line, nbyte);
-    free(buff);
+
+    // Preparing the prompt
+    char *prompt = malloc(sizeof(char) * (strlen(tmp) + 3));
+    strcpy(prompt, tmp);
+    prompt[strlen(tmp) + 0] = ' ';
+    prompt[strlen(tmp) + 1] = '>';
+    prompt[strlen(tmp) + 2] = ' ';
+    prompt[strlen(tmp) + 3] = '\0';
+
+    // Readline
+    char *line = readline(prompt);
+    // Upon success line should be str. But in case of EOF, it will be NULL
+    if (line == NULL) {
+        // When EOF occurs, no blank lines are printed. So we need to do so
+        // manually.
+        strncpy(buf, "", nbyte);
+        write(STDOUT_FILENO, "\n", 1);
+    }
+    else strncpy(buf, line, nbyte);
+
+    free(prompt);
     READING = 0;
     return (int)strlen(buf);
 }
