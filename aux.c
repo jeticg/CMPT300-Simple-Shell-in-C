@@ -95,10 +95,31 @@ void expandEvent(char *buff, int maxLen) {
 
             } else {
                 // selected command
-                int j = i;
-                while (j < numChars && '0' <= buff[j] && buff[j] <= '9') j++;
+                int sum = 0;
                 oriSize = 1;
-                strcpy(tmp, "");
+
+                while (i + oriSize < numChars &&
+                        '0' <= buff[i + oriSize] &&
+                        buff[i + oriSize] <= '9') {
+                    sum = sum * 10 + (int)(buff[i + oriSize] - '0');
+                    printf("%d %d %d\n", buff[i + oriSize], '0', '9');
+                    oriSize++;
+                }
+                if (oriSize == 1) {
+                    write(STDOUT_FILENO, "-shell: event not found\n",
+                        strlen("-shell: event not found\n"));
+                    strcpy(buff, "");
+                    free(tmp);
+                    return;
+                }
+                getHistory(sum, tmp);
+                if (strcmp(tmp, "") == 0) {
+                    write(STDOUT_FILENO, "-shell: event not found\n",
+                        strlen("-shell: event not found\n"));
+                    strcpy(buff, "");
+                    free(tmp);
+                    return;
+                }
             }
 
             // Shift buff (left)
@@ -198,6 +219,25 @@ void getLastHistory(char* buff) {
         strcpy(buff, historyHead->next->value);
     else
         strcpy(buff, "");
+}
+
+void getHistory(int id, char* buff) {
+    if (historyHead == NULL || historyHead->next == NULL) {
+        strcpy(buff, "");
+        return;
+    }
+    if (id < 1 || id > historyHead->next->id) {
+        strcpy(buff, "");
+        return;
+    }
+    struct CharNode *node = historyHead;
+    while (node->next) {
+        if (node->next->id == id) {
+            strcpy(buff, node->next->value);
+            return;
+        }
+        node = node->next;
+    }
 }
 
 void printHistory() {
