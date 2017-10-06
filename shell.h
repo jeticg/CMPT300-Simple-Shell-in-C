@@ -1,3 +1,12 @@
+/*
+    #04-2017-105-4002
+    CMPT300 Project 2
+    shell.h
+
+    Name: Jetic Gu
+    Student ID: 301295754
+    Chicken Nuggets are the best.
+*/
 #ifndef JETIC_SHELL
 
 #include <limits.h>

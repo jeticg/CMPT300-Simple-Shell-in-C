@@ -1,3 +1,12 @@
+/*
+    #04-2017-105-4002
+    CMPT300 Project 2
+    aux.c
+
+    Name: Jetic Gu
+    Student ID: 301295754
+    I wanna wanna Chicken Nuggets.
+*/
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>

@@ -1,5 +1,12 @@
-// Shell starter file
-// You may make any changes to any part of this file.
+/*
+    #04-2017-105-4002
+    CMPT300 Project 2
+    shell.c
+
+    Name: Jetic Gu
+    Student ID: 301295754
+    I am eating Chicken Nuggets now.
+*/
 #include "shell.h"
 
 #include <stdio.h>
@@ -235,7 +242,6 @@ void execCommand(char *tokens[]) {
         execCommand
         This function will process the tokens into different commmands and execute
         them by calling execSingleCommand.
-
     */
     // Sort out && symbols
     watchBackgroundProcess();
