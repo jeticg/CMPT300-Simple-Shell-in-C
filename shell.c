@@ -40,9 +40,10 @@ int main() {
         // Use write because we need to use read() to work with
         #ifdef CHICKEN
         #else
-        char *buff = getcwd(NULL, 0);
-        write(STDOUT_FILENO, buff, strlen(buff));
-        write(STDOUT_FILENO, " > ", strlen(" > "));
+        char *prompt;
+        getPrompt(&prompt);
+        write(STDOUT_FILENO, prompt, strlen(prompt));
+        free(prompt);
         #endif
         readCommand(inputBuffer, tokens);
 
@@ -318,14 +319,10 @@ void signalHandler(int signum) {
         #ifdef CHICKEN
         if (isReading() != 0) {
         #endif
-            char *tmp = getcwd(NULL, 0);
-            char *buff = malloc(sizeof(char) * (strlen(tmp) + 3));
-            strcpy(buff, tmp);
-            buff[strlen(tmp) + 0] = ' ';
-            buff[strlen(tmp) + 1] = '>';
-            buff[strlen(tmp) + 2] = ' ';
-            buff[strlen(tmp) + 3] = '\0';
-            write(STDIN_FILENO, buff, strlen(buff));
+            char *prompt;
+            getPrompt(&prompt);
+            write(STDIN_FILENO, prompt, strlen(prompt));
+            free(prompt);
         #ifdef CHICKEN
         }
         #endif

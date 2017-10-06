@@ -12,6 +12,7 @@
 
 void expandHome(char *buff, int maxLen);
 void expandEvent(char *buff, int maxLen);
+void getPrompt(char **buff);
 
 void watchBackgroundProcess();
 void addBackgroundProcess(int pid);

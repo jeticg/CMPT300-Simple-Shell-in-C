@@ -180,7 +180,25 @@ void expandEvent(char *buff, int maxLen) {
     }
 }
 
+void getPrompt(char **buff) {
+    // Check parameter
+    if (buff == NULL) return;
 
+    // Get home directory
+    char *tmp = getcwd(NULL, 0);
+    if (tmp == NULL) tmp = "";
+
+    // Add trailing " > "
+    *buff = malloc(sizeof(char) * (strlen(tmp) + 3));
+    char *promt = *buff;
+    strcpy(promt, tmp);
+    promt[strlen(tmp) + 0] = ' ';
+    promt[strlen(tmp) + 1] = '>';
+    promt[strlen(tmp) + 2] = ' ';
+    promt[strlen(tmp) + 3] = '\0';
+}
+
+// Background Processes
 void addBackgroundProcess(int pid) {
     /*
     This function adds the pid of a process to the watch list.
@@ -418,15 +436,10 @@ void clearHistory() {
 #ifdef CHICKEN
 int reader(void *buf, size_t nbyte) {
     READING = 1;
-    char *tmp = getcwd(NULL, 0);
 
     // Preparing the prompt
-    char *prompt = malloc(sizeof(char) * (strlen(tmp) + 3));
-    strcpy(prompt, tmp);
-    prompt[strlen(tmp) + 0] = ' ';
-    prompt[strlen(tmp) + 1] = '>';
-    prompt[strlen(tmp) + 2] = ' ';
-    prompt[strlen(tmp) + 3] = '\0';
+    char *prompt;
+    getPrompt(&prompt);
 
     // Readline
     char *line = readline(prompt);
