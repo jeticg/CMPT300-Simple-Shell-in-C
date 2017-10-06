@@ -92,18 +92,35 @@ void expandHome(char *buff, int maxLen) {
     use '~' to indicate home directory.
     */
     int numChars = (int)strnlen(buff, (size_t)maxLen);
-    struct passwd *pw = getpwuid(getuid());
+
     for (int i = 0; i < numChars; i++) {
         if (buff[i] == '~' &&
                 (i == 0 || buff[i-1] == '\0' || buff[i-1] == ' ')) {
-            char *homedir = pw->pw_dir;
+
+            // Get home directory
+            struct passwd *pw = getpwuid(getuid());
+            char *homedir;
+            if (pw != NULL && pw->pw_dir != NULL)
+                homedir = pw->pw_dir;
+            else
+                homedir = "";
+            int homedirLen = (int)strnlen(homedir, (size_t)maxLen);
+
+            // Safety check: result not exceed maximum command length
+            if (numChars - 1 + homedirLen >= maxLen) {
+                buff[0] = '\0';
+                write(STDOUT_FILENO,
+                    "-shell: command exceeded maximum length\n",
+                    strlen("-shell: command exceeded maximum length\n"));
+                return;
+            }
+
             for (int j=0; j<numChars-i+1; j++) {
-                buff[numChars + (int)strlen(homedir) - j - 1] =\
-                    buff[numChars - j];
+                buff[numChars + homedirLen - 1 - j] =  buff[numChars - j];
             }
             numChars--;
             numChars+=strlen(homedir);
-            for (int j=0; j<(int)strlen(homedir); j++)
+            for (int j=0; j<homedirLen; j++)
                 buff[i + j] = homedir[j];
         }
     }
@@ -370,7 +387,7 @@ void getLastHistory(char* buff) {
 
 void getHistory(int id, char* buff) {
     /*
-    This function returns the command matching id. Might not be very saft to
+    This function returns the command matching id. Might not be very safe to
     use strcpy though.
     */
     if (historyHead == NULL || historyHead->next == NULL) {
