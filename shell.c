@@ -139,7 +139,7 @@ void readCommand(char *buff, char *tokens[]) {
     int length = (int)read(STDIN_FILENO, buff, COMMAND_LENGTH-1);
     #endif
 
-    if (length < 0) {
+    if (length < 0 && errno != EINTR) {
         perror("Unable to read command from keyboard. Terminating.\n");
         exit(-1);
     }
@@ -218,38 +218,33 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
     write(STDOUT_FILENO, tokens[0], strlen(tokens[0]));
     write(STDOUT_FILENO, "\n", 1);
     #endif
+
+    // Check if it is exit command
     if (strcmp(tokens[0], "exit") == 0 || strcmp(tokens[0], "quit") == 0)
         coreExit();
-    if (executionCode == DIRECT_EXECUTION) {
-        if (execInternalCommand(tokens) == 2) return;
-        int pid = fork();
-        if (pid < 0) {
-            write(STDOUT_FILENO, "Something is wrong. TAT\n",
-                  strlen("Something is wrong. TAT\n"));
-            return;
-        } else if (pid == 0) {
-            callExecvp(tokens[0], tokens);
-            exit(0);
-        } else {
-            waitpid(-1, NULL, 0);
-        }
-    } else if (executionCode == BACKGROUND_EXECUTION) {
-        if (execInternalCommand(tokens) == 2) return;
-        int pid = fork();
-        if (pid < 0) {
-            write(STDOUT_FILENO, "Something is wrong. TAT\n",
-                  strlen("Something is wrong. TAT\n"));
-            return;
-        } else if (pid == 0) {
-            callExecvp(tokens[0], tokens);
-            exit(0);
-        } else {
-            addBackgroundProcess(pid);
-        }
+
+    // Check if it is internal command
+    if (execInternalCommand(tokens) == 2) return;
+
+    // Start actual execution, create subprocess
+    int pid = fork();
+    int status;
+
+    if (pid < 0) {
+        write(STDOUT_FILENO, "Something is wrong. TAT\n",
+              strlen("Something is wrong. TAT\n"));
+        return;
+    } else if (pid == 0) {
+        callExecvp(tokens[0], tokens);
     } else {
-        write(STDOUT_FILENO, "Execution mode not implemented.\n",
-              strlen("Execution mode not implemented.\n"));
+        if (executionCode == DIRECT_EXECUTION)
+            waitpid(pid, &status, 0);
+        else
+            addBackgroundProcess(pid);
     }
+    if (executionCode == DIRECT_EXECUTION)
+        while (!WIFEXITED(status) && !WIFSIGNALED(status));
+
 }
 
 void execCommand(char *tokens[]) {
