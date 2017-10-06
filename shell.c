@@ -138,7 +138,7 @@ int tokeniseCommand(char *buff, char *tokens[]) {
 
             // Handle other characters (may be start)
             default:
-                if (!inToken) {
+                if (!inToken && buff[i] != '\0') {
                     tokens[tokenCount] = &buff[i];
                     tokenCount++;
                     inToken = true;
