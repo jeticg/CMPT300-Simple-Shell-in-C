@@ -18,6 +18,7 @@
 #ifdef CHICKEN
 #include <readline/readline.h>
 #include <readline/history.h>
+int READING = 0;
 #endif
 
 #include "aux.h"
@@ -282,6 +283,7 @@ void clearHistory() {
 
 #ifdef CHICKEN
 int reader(void *buf, size_t nbyte) {
+    READING = 1;
     char *tmp = getcwd(NULL, 0);
     char *buff = malloc(sizeof(char) * (strlen(tmp) + 3));
     strcpy(buff, tmp);
@@ -292,7 +294,11 @@ int reader(void *buf, size_t nbyte) {
     char *line = readline(buff);
     strncpy(buf, line, nbyte);
     free(buff);
+    READING = 0;
     return (int)strlen(buf);
+}
+int isReading() {
+    return READING;
 }
 #endif
 

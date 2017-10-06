@@ -30,6 +30,7 @@ void callExecvp(const char *pathname, char *const *argv);
 void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode);
 void execCommand(char *tokens[]);
 void coreExit();
+void signalHandler(int signum);
 
 #define JETIC_SHELL
 #endif

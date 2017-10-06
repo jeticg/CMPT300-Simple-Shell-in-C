@@ -25,6 +25,7 @@ void clearHistory();
 
 #ifdef CHICKEN
 int reader(void *buf, size_t nbyte);
+int isReading();
 #endif
 
 #define JETIC_SHELL_AUX

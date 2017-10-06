@@ -31,6 +31,10 @@ int main() {
 
     char inputBuffer[COMMAND_LENGTH];
     char *tokens[NUM_TOKENS];
+
+    // Signal Handler
+    signal(SIGINT, signalHandler);
+
     while (true) {
         // Get command
         // Use write because we need to use read() to work with
@@ -235,6 +239,8 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
               strlen("Something is wrong. TAT\n"));
         return;
     } else if (pid == 0) {
+        if (executionCode != DIRECT_EXECUTION)
+            signal(SIGINT, SIG_IGN);
         callExecvp(tokens[0], tokens);
     } else {
         if (executionCode == DIRECT_EXECUTION)
@@ -270,4 +276,25 @@ void execCommand(char *tokens[]) {
         }
     }
     execSingleCommand(startOfCommand, DIRECT_EXECUTION);
+}
+
+void signalHandler(int signum) {
+    if (signum == SIGINT) {
+        write(STDIN_FILENO, "^C\n", strlen("^C\n"));
+        printHistory();
+        #ifdef CHICKEN
+        if (isReading() != 0) {
+        #endif
+            char *tmp = getcwd(NULL, 0);
+            char *buff = malloc(sizeof(char) * (strlen(tmp) + 3));
+            strcpy(buff, tmp);
+            buff[strlen(tmp) + 0] = ' ';
+            buff[strlen(tmp) + 1] = '>';
+            buff[strlen(tmp) + 2] = ' ';
+            buff[strlen(tmp) + 3] = '\0';
+            write(STDIN_FILENO, buff, strlen(buff));
+        #ifdef CHICKEN
+        }
+        #endif
+    }
 }
