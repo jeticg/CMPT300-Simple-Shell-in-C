@@ -18,8 +18,8 @@
 int main() {
     #ifdef DEBUG
     write(STDOUT_FILENO,
-          "Built in DEBUG mode.\n",
-          strlen("Built in DEBUG mode.\n"));
+          "[DEBUG] Built in DEBUG mode.\n",
+          strlen("[DEBUG] Built in DEBUG mode.\n"));
     #endif
 
     char inputBuffer[COMMAND_LENGTH];
@@ -34,7 +34,7 @@ int main() {
         // DEBUG: Dump out arguments:
         #ifdef DEBUG
         for (int i = 0; tokens[i] != NULL; i++) {
-            write(STDOUT_FILENO, "   Token: ", strlen("   Token: "));
+            write(STDOUT_FILENO, "[DEBUG] Token: ", strlen("[DEBUG] Token: "));
             write(STDOUT_FILENO, tokens[i], strlen(tokens[i]));
             write(STDOUT_FILENO, "\n", strlen("\n"));
         }
@@ -148,12 +148,12 @@ int execInternalCommand(char *tokens[]) {
     */
     if (tokens == NULL || tokens[0] == NULL) return 2;
     if (strcmp(tokens[0], "cd") == 0) {
-        if (tokens[1] != NULL)
-            chdir(tokens[1]);
-        else {
+        if (tokens[1] != NULL) {
+            if (chdir(tokens[1]) != 0) printErrorMsg(errno);
+        } else {
             struct passwd *pw = getpwuid(getuid());
             char *homedir = pw->pw_dir;
-            chdir(homedir);
+            if (chdir(homedir) != 0) printErrorMsg(errno);
         }
         return 2;
     }
