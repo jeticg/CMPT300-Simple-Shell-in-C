@@ -82,6 +82,9 @@ int tokeniseCommand(char *buff, char *tokens[]) {
     */
     int tokenCount = 0;
     _Bool inToken = false;
+    _Bool doppelteAZ = false;  // Doppelte Anführungszeichen
+    _Bool einfacheAZ = false;  // Einfache Anführungszeichen
+
     expandEvent(buff, COMMAND_LENGTH);
     int numChars = (int)strnlen(buff, COMMAND_LENGTH);
     if (numChars > 0)
@@ -102,9 +105,33 @@ int tokeniseCommand(char *buff, char *tokens[]) {
             case ' ':
             case '\t':
             case '\n':
-                buff[i] = '\0';
-                inToken = false;
+                if (doppelteAZ == false && einfacheAZ == false) {
+                    buff[i] = '\0';
+                    inToken = false;
+                }
                 break;
+
+            case '\"':
+                if (einfacheAZ == false) {
+                    if (doppelteAZ == false) doppelteAZ = true;
+                    else doppelteAZ = false;
+                    for (int j = i; j < numChars; j++)
+                        buff[j] = buff[j + 1];
+                    numChars--;
+                    i--;
+                    break;
+                }
+            case '\'':
+                if (doppelteAZ == false) {
+                    if (einfacheAZ == false) einfacheAZ = true;
+                    else einfacheAZ = false;
+                    for (int j = i; j < numChars; j++)
+                        buff[j] = buff[j + 1];
+                    numChars--;
+                    i--;
+                    break;
+                }
+
 
             // Handle other characters (may be start)
             default:
