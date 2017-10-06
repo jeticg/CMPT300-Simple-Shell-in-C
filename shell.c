@@ -224,11 +224,7 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
             callExecvp(tokens[0], tokens);
             exit(0);
         } else {
-            write(STDOUT_FILENO, "[B] ", strlen("[B] "));
-            char str[MAX_STRLEN];
-            snprintf(str, MAX_STRLEN, "%d", pid);
-            write(STDOUT_FILENO, str, strlen(str));
-            write(STDOUT_FILENO, "\n", 1);
+            addBackgroundProcess(pid);
         }
     } else {
         write(STDOUT_FILENO, "Execution mode not implemented.\n",
@@ -243,7 +239,8 @@ void execCommand(char *tokens[]) {
         them by calling execSingleCommand.
 
     */
-    // Sort out && symbols-
+    // Sort out && symbols
+    watchBackgroundProcess();
     char **startOfCommand = &tokens[0];
     for (int i=0; tokens[i] != NULL; i++) {
         if (strcmp(tokens[i], "&&") == 0) {
