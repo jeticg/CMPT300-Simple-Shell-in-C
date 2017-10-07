@@ -14,7 +14,9 @@ void addBackgroundProcess(int pid);
 void clearBackgroundProcess();
 void printBackgroundProcess();
 
-void pauseSubprocess(int pid);
+void setActiveSubprocess(int pid);
+int currentActiveSubprocess();
+void pauseActiveSubprocess();
 void resumeSubprocess(int pid);
 void resumeSubprocessBackground(int pid);
 

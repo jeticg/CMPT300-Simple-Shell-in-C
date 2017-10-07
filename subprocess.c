@@ -92,6 +92,9 @@ void watchBackgroundProcess() {
     struct Node *node = head;
     if (head == NULL) return;
 
+    if (head->value != 0 && getpgid(head->value) < 0)
+        head->value = 0;
+
     while (node->next != NULL) {
         int status;
         struct Node *tmp;
@@ -173,4 +176,40 @@ void printBackgroundProcess() {
         write(STDOUT_FILENO, str, strlen(str));
         write(STDOUT_FILENO, "\n", 1);
     }
+}
+
+void setActiveSubprocess(int pid) {
+    /*
+    This function sets currently active process to pid
+    */
+    // Parameter check
+    if (pid <= 0) return;
+    // Check if pid given exists.
+    if (getpgid(pid) < 0) return;
+
+    if (head == NULL) head = NewNode();
+    head->value = pid;
+}
+
+int currentActiveSubprocess() {
+    if (head == NULL) return 0;
+    if (head->value <= 0) return 0;
+    int pid = head->value;
+    if (getpgid(pid) < 0) {
+        head->value = 0;
+        return 0;
+    }
+    return pid;
+}
+
+void pauseActiveSubprocess() {
+    if (head == NULL) return;
+    if (head->value <= 0) return;
+    int pid = head->value;
+    if (getpgid(pid) < 0) {
+        head->value = 0;
+        return;
+    }
+    addBackgroundProcess(pid);
+    head->value = 0;
 }

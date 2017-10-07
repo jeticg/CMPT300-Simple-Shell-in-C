@@ -294,9 +294,11 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
             signal(SIGINT, SIG_IGN);
         callExecvp(tokens[0], tokens);
     } else {
-        if (executionCode == DIRECT_EXECUTION)
-            waitpid(pid, &status, 0);
-        else
+        if (executionCode == DIRECT_EXECUTION) {
+            setActiveSubprocess(pid);
+            while (pid == currentActiveSubprocess())
+                waitpid(pid, &status, WNOHANG);
+        } else
             addBackgroundProcess(pid);
     }
     if (executionCode == DIRECT_EXECUTION)
@@ -344,6 +346,6 @@ void signalHandler(int signum) {
         }
         #endif
     } else if (signum == SIGTSTP){
-
+        pauseActiveSubprocess();
     } else exit(signum);
 }
