@@ -63,8 +63,22 @@ void addBackgroundProcess(int pid) {
     // Check if pid given exists.
     if (getpgid(pid) < 0) return;
 
+    // Check if already in list
+    struct Node *newNode = head;
+    if (newNode != NULL) {
+        newNode = newNode->next;
+        while (newNode != NULL) {
+            if (newNode->value == pid) {
+                char str[MAX_STRLEN];
+                sprintf(str, "[%d] %d\n", newNode->id, pid);
+                write(STDOUT_FILENO, str, strlen(str));
+                return;
+            }
+            newNode = newNode->next;
+        }
+    }
 
-    struct Node *newNode = NewNode();
+    newNode = NewNode();
     newNode->value = pid;
 
     if (head == NULL) head = NewNode();
