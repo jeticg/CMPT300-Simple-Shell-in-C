@@ -249,6 +249,10 @@ int execInternalCommand(char *tokens[]) {
         printBackgroundProcess();
         return 2;
     }
+    if (strcmp(tokens[0], "rsum") == 0) {
+        resumeSubprocess(0);
+        return 2;
+    }
     return 0;
 }
 

@@ -224,7 +224,19 @@ void pauseActiveSubprocess() {
         head->value = 0;
         return;
     }
-    kill(pid, 22);
+    kill(pid, SIGSTOP);
     addBackgroundProcess(pid);
     head->value = 0;
+}
+
+void resumeSubprocess(int pid) {
+    if (head == NULL) return;
+    if (pid == 0 && head->next != NULL)
+        pid = head->next->value;
+    if (pid == 0)
+        return;
+    kill(head->next->value, SIGCONT);
+    setActiveSubprocess(pid);
+    while (pid == currentActiveSubprocess())
+        waitpid(pid, NULL, WNOHANG);
 }
