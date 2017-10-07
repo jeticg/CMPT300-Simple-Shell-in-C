@@ -65,6 +65,7 @@ void addBackgroundProcess(int pid) {
 
 
     struct Node *newNode = NewNode();
+    newNode->value = pid;
 
     if (head == NULL) head = NewNode();
 
