@@ -36,6 +36,7 @@ struct Node {
         next: linked list next node
     */
     int value;
+    int state;
     int id;
     struct Node *next;
 } *head=NULL;
@@ -47,6 +48,7 @@ struct Node *NewNode() {
         (struct Node*)malloc(sizeof(struct Node));
     newNode->id = 0;
     newNode->value = 0;
+    newNode->state = 0;
     newNode->next = NULL;
     return newNode;
 }
@@ -93,6 +95,7 @@ void addBackgroundProcess(int pid) {
     head->next = newNode;
 
     newNode->id = head->id;
+    newNode->state = STATE_RUNNING;
 
     char str[MAX_STRLEN];
     sprintf(str, "[%d] %d\n", newNode->id, pid);
@@ -186,6 +189,12 @@ void printBackgroundProcess() {
         char str[MAX_STRLEN];
         sprintf(str, "[%d] ", list[i]->id);
         write(STDOUT_FILENO, str, strlen(str));
+
+        if (list[i]->state == STATE_RUNNING)
+            write(STDOUT_FILENO, "running ", strlen("running "));
+        if (list[i]->state == STATE_STOPPED)
+            write(STDOUT_FILENO, "stopped ", strlen("stopped "));
+
         sprintf(str, "%d", list[i]->value);
         write(STDOUT_FILENO, str, strlen(str));
         write(STDOUT_FILENO, "\n", 1);
@@ -226,17 +235,39 @@ void pauseActiveSubprocess() {
     }
     kill(pid, SIGSTOP);
     addBackgroundProcess(pid);
+    head->next->state = STATE_STOPPED;
     head->value = 0;
 }
 
 void resumeSubprocess(int pid) {
+    struct Node *node;
+
+    watchBackgroundProcess();
     if (head == NULL) return;
-    if (pid == 0 && head->next != NULL)
-        pid = head->next->value;
+    if (pid == 0) {
+        node = head->next;
+        while (node != NULL) {
+            if (node->state == STATE_STOPPED) {
+                pid = node->value;
+                break;
+            }
+        }
+    }
     if (pid == 0)
         return;
-    kill(head->next->value, SIGCONT);
+    kill(pid, SIGCONT);
+    // Set state in list
+    node = head->next;
+    while (node != NULL) {
+        if (node->value == pid) {
+            node->state = STATE_RUNNING;
+            char str[MAX_STRLEN];
+            sprintf(str, "[%d] %d\n", node->id, pid);
+            write(STDOUT_FILENO, str, strlen(str));
+            break;
+        }
+    }
     setActiveSubprocess(pid);
-    while (pid == currentActiveSubprocess())
+    while (pid == currentActiveSubprocess() && getpgid(pid) >= 0)
         waitpid(pid, NULL, WNOHANG);
 }

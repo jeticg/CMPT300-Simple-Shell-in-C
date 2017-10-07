@@ -301,7 +301,7 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
     } else {
         if (executionCode == DIRECT_EXECUTION) {
             setActiveSubprocess(pid);
-            while (pid == currentActiveSubprocess())
+            while (pid == currentActiveSubprocess() && getpgid(pid) >= 0)
                 waitpid(pid, &status, WNOHANG);
         } else
             addBackgroundProcess(pid);

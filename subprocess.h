@@ -20,5 +20,9 @@ void pauseActiveSubprocess();
 void resumeSubprocess(int pid);
 void resumeSubprocessBackground(int pid);
 
+// Running State
+#define STATE_RUNNING 1
+#define STATE_STOPPED -1
+
 #define JETIC_SHELL_SUBPROC
 #endif
