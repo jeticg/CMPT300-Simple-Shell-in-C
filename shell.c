@@ -22,6 +22,7 @@
 
 #include "errorExplain.h"
 #include "aux.h"
+#include "subprocess.h"
 
 // Main
 int main() {
@@ -36,6 +37,7 @@ int main() {
 
     // Signal Handler
     signal(SIGINT, signalHandler);
+    signal(SIGTSTP, signalHandler);
 
     while (true) {
         // Get command
@@ -188,7 +190,7 @@ void readCommand(char *buff, char *tokens[]) {
 }
 
 void coreExit() {
-    clearBackgoundProcess();
+    clearBackgroundProcess();
     clearHistory();
     exit(0);
 }
@@ -244,7 +246,7 @@ int execInternalCommand(char *tokens[]) {
         return 2;
     }
     if (strcmp(tokens[0], "subproc") == 0) {
-        printBackgoundProcess();
+        printBackgroundProcess();
         return 2;
     }
     return 0;
@@ -341,6 +343,7 @@ void signalHandler(int signum) {
         #ifdef CHICKEN
         }
         #endif
-    }
-    else exit(signum);
+    } else if (signum == SIGTSTP){
+
+    } else exit(signum);
 }
