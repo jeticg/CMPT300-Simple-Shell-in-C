@@ -292,6 +292,7 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
     } else if (pid == 0) {
         if (executionCode != DIRECT_EXECUTION)
             signal(SIGINT, SIG_IGN);
+            signal(SIGTSTP, SIG_IGN);
         callExecvp(tokens[0], tokens);
     } else {
         if (executionCode == DIRECT_EXECUTION) {

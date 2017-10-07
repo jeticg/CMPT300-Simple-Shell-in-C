@@ -210,6 +210,7 @@ void pauseActiveSubprocess() {
         head->value = 0;
         return;
     }
+    kill(pid, 22);
     addBackgroundProcess(pid);
     head->value = 0;
 }
