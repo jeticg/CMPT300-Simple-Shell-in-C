@@ -351,8 +351,10 @@ int reader(void *buf, size_t nbyte) {
         // manually.
         strncpy(buf, "", nbyte);
         write(STDOUT_FILENO, "\n", 1);
+    } else {
+        strncpy(buf, line, nbyte);
+        free(line);
     }
-    else strncpy(buf, line, nbyte);
 
     READING = 0;
     return (int)strlen(buf);
