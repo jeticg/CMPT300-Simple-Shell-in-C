@@ -160,8 +160,8 @@ void clearBackgroundProcess() {
 
             // perform the kill
             kill(tmp->value, 9);
-            free(tmp);
         }
+        free(tmp);
     }
 }
 
