@@ -199,20 +199,24 @@ void expandEvent(char *buff, int maxLen) {
 void getPrompt(char **buff) {
     // Check parameter
     if (buff == NULL) return;
+    if (prompt != NULL) free(prompt);
 
     // Get home directory
     char *tmp = getcwd(NULL, 0);
-    if (tmp == NULL) tmp = "";
-
-    if (prompt != NULL) free(prompt);
 
     // Add trailing " > "
-    prompt = malloc(sizeof(char) * (strlen(tmp) + 3));
-    strcpy(prompt, tmp);
-    prompt[strlen(tmp) + 0] = ' ';
-    prompt[strlen(tmp) + 1] = '>';
-    prompt[strlen(tmp) + 2] = ' ';
-    prompt[strlen(tmp) + 3] = '\0';
+    if (tmp == NULL) {
+        prompt = malloc(sizeof(char) * 3);
+        strcpy(prompt, "> ");
+    } else {
+        prompt = malloc(sizeof(char) * (strlen(tmp) + 3));
+        strcpy(prompt, tmp);
+        prompt[strlen(tmp) + 0] = ' ';
+        prompt[strlen(tmp) + 1] = '>';
+        prompt[strlen(tmp) + 2] = ' ';
+        prompt[strlen(tmp) + 3] = '\0';
+        free(tmp);
+    }
 
     *buff = prompt;
 }
@@ -350,7 +354,6 @@ int reader(void *buf, size_t nbyte) {
     }
     else strncpy(buf, line, nbyte);
 
-    free(prompt);
     READING = 0;
     return (int)strlen(buf);
 }

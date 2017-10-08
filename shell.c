@@ -47,7 +47,6 @@ int main() {
         char *prompt;
         getPrompt(&prompt);
         write(STDOUT_FILENO, prompt, strlen(prompt));
-        free(prompt);
         #endif
         readCommand(inputBuffer, tokens);
 
@@ -239,6 +238,7 @@ int execInternalCommand(char *tokens[]) {
             write(STDOUT_FILENO, buff, strlen(buff));
             write(STDOUT_FILENO, "\n", 1);
         }
+        free(buff);
         return 2;
     }
     if (strcmp(tokens[0], "history") == 0) {
@@ -349,7 +349,6 @@ void signalHandler(int signum) {
             char *prompt;
             getPrompt(&prompt);
             write(STDIN_FILENO, prompt, strlen(prompt));
-            free(prompt);
         #ifdef CHICKEN
         }
         #endif
