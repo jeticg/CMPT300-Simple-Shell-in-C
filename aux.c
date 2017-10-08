@@ -31,6 +31,7 @@
 #include <readline/history.h>
 //#include <readline/signals.h>
 int READING = 0;
+char *prompt = NULL;
 #endif
 
 #include "aux.h"
@@ -203,14 +204,17 @@ void getPrompt(char **buff) {
     char *tmp = getcwd(NULL, 0);
     if (tmp == NULL) tmp = "";
 
+    if (prompt != NULL) free(prompt);
+
     // Add trailing " > "
-    *buff = malloc(sizeof(char) * (strlen(tmp) + 3));
-    char *promt = *buff;
-    strcpy(promt, tmp);
-    promt[strlen(tmp) + 0] = ' ';
-    promt[strlen(tmp) + 1] = '>';
-    promt[strlen(tmp) + 2] = ' ';
-    promt[strlen(tmp) + 3] = '\0';
+    prompt = malloc(sizeof(char) * (strlen(tmp) + 3));
+    strcpy(prompt, tmp);
+    prompt[strlen(tmp) + 0] = ' ';
+    prompt[strlen(tmp) + 1] = '>';
+    prompt[strlen(tmp) + 2] = ' ';
+    prompt[strlen(tmp) + 3] = '\0';
+
+    *buff = prompt;
 }
 
 
@@ -324,6 +328,7 @@ void clearHistory() {
             free(tmp->value);
         free(tmp);
     }
+    if (prompt != NULL) free(prompt);
 }
 
 #ifdef CHICKEN
