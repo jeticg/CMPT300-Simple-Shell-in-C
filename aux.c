@@ -169,6 +169,7 @@ void expandEvent(char *buff, int maxLen) {
                 write(STDOUT_FILENO,
                     "-shell: command exceeded maximum length\n",
                     strlen("-shell: command exceeded maximum length\n"));
+                free(event);
                 return;
             }
 
