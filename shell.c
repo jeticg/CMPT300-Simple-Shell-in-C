@@ -38,6 +38,11 @@ int main() {
     // Signal Handler
     signal(SIGINT, signalHandler);
     signal(SIGTSTP, signalHandler);
+    signal(SIGQUIT, SIG_IGN);
+    signal(SIGTTIN, SIG_IGN);
+    signal(SIGTTOU, SIG_IGN);
+    signal(SIGCHLD, SIG_IGN);
+
 
     while (true) {
         // Get command
@@ -340,6 +345,12 @@ void execCommand(char *tokens[]) {
 }
 
 void signalHandler(int signum) {
+    signal(SIGINT, signalHandler);
+    signal(SIGTSTP, signalHandler);
+    signal(SIGQUIT, SIG_IGN);
+    signal(SIGTTIN, SIG_IGN);
+    signal(SIGTTOU, SIG_IGN);
+    signal(SIGCHLD, SIG_IGN);
     if (signum == SIGINT) {
         write(STDIN_FILENO, "\n", 1);
         printHistory();
