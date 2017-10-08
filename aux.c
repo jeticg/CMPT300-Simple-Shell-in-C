@@ -31,10 +31,12 @@
 #include <readline/history.h>
 //#include <readline/signals.h>
 int READING = 0;
-char *prompt = NULL;
 #endif
 
 #include "aux.h"
+
+// Constants
+char *prompt = NULL;
 
 // DEFINE
 #define COMMAND_LENGTH 1024

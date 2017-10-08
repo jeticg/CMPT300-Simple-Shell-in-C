@@ -341,7 +341,7 @@ void execCommand(char *tokens[]) {
 
 void signalHandler(int signum) {
     if (signum == SIGINT) {
-        write(STDIN_FILENO, "^C\n", strlen("^C\n"));
+        write(STDIN_FILENO, "\n", 1);
         printHistory();
         #ifdef CHICKEN
         if (isReading() != 0) {
