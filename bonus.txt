@@ -1,0 +1,42 @@
+# What I did in addition to the project requirement
+
+I added a lot of stuff in this project so that I can actually use
+this shell as my primary shell. There's nothing fancy, just some
+of the common features that one would find in a standard shell. 
+And I did not strictly follow GNU's shell implementation guide.
+
+So here is the list:
+
+1. Tokenisation: handling of quotation marks, multiple commands on
+the same line (for "&&" and "&").
+
+2. Background process I/O redirected to /dev/null using dup2
+
+3. Background process list and monitoring.
+
+4. Stop a foreground process and resuming it using signals and
+background process list.
+
+5. Expand '~' to home directory.
+
+6. 'history' as required by the instructor only displays last 10
+commands, all historical commands are stored and accessible through
+event handler ('!').
+
+7. Use readline package when handling command input. This allows
+the usage of arrow keys for editing command and going back in
+history. This feature can be disabled by removing '-DCHICKEN' and
+'-lreadline' in `Makefile`.
+
+Effect: Like I mentioned, I can use this shell as my primary shell
+all day. That includes: run music player in background, use vim to
+write code, pause vim to do other stuff and resume, use git commands
+to commit and push my changes. Tab doesn't work that well but it is
+better than nothing. (OSX's readline package is a bit painful to work
+with as it was not included in OSX's library，and the third-party
+one doesn't support user defined signal handling.
+
+For more information, I've written a bit more in the README.md. The
+code contains comments which explains what each part is doing.
+
+This shell is developed chiefly under OSX but also tested in Ubuntu.
