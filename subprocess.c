@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <pwd.h>
@@ -19,6 +20,7 @@
 #include <signal.h>
 #include <fcntl.h>
 
+#include "errorExplain.h"
 #include "subprocess.h"
 
 
@@ -241,7 +243,11 @@ void pauseActiveSubprocess() {
         head->value = 0;
         return;
     }
-    kill(pid, SIGSTOP);
+    if (kill(pid, SIGSTOP) < 0) {
+        write(STDOUT_FILENO, "kill: ", strlen("kill: "));
+        printErrorMsg(errno);
+        return;
+    }
     addBackgroundProcess(pid);
     head->next->state = STATE_STOPPED;
     head->value = 0;
@@ -269,7 +275,11 @@ void resumeSubprocess(int pid) {
     if (pid <= 0) return;
 
 
-    kill(pid, SIGCONT);
+    if (kill(pid, SIGCONT) < 0) {
+        write(STDOUT_FILENO, "-rsum: ", strlen("-rsum: "));
+        printErrorMsg(errno);
+        return;
+    }
     // Set state in list
     node = head->next;
     while (node != NULL) {
