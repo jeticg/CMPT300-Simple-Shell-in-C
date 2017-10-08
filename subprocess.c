@@ -204,7 +204,7 @@ void printBackgroundProcess() {
 
 void setActiveSubprocess(int pid) {
     /*
-    This function sets currently active process to pid
+    This function sets currently active (foreground) process to pid
     */
     // Parameter check
     if (pid <= 0) return;
@@ -216,6 +216,9 @@ void setActiveSubprocess(int pid) {
 }
 
 int currentActiveSubprocess() {
+    /*
+    Returns the PID of currently active foreground process.
+    */
     if (head == NULL) return 0;
     if (head->value <= 0) return 0;
     int pid = head->value;
@@ -227,6 +230,10 @@ int currentActiveSubprocess() {
 }
 
 void pauseActiveSubprocess() {
+    /*
+    This function marks the currently active process as stopped and sends it a
+    SIGSTOP signal.
+    */
     if (head == NULL) return;
     if (head->value <= 0) return;
     int pid = head->value;
@@ -241,6 +248,11 @@ void pauseActiveSubprocess() {
 }
 
 void resumeSubprocess(int pid) {
+    /*
+    This function resumes a previously stopped process to foreground.
+    If pid equals 0 then the first process in the process list that is stopped
+    will be resumed.
+    */
     struct Node *node;
 
     watchBackgroundProcess();
@@ -254,8 +266,9 @@ void resumeSubprocess(int pid) {
             }
         }
     }
-    if (pid == 0)
-        return;
+    if (pid <= 0) return;
+
+
     kill(pid, SIGCONT);
     // Set state in list
     node = head->next;
@@ -275,6 +288,11 @@ void resumeSubprocess(int pid) {
 
 
 void redirectIO() {
+    /*
+    This function redirects all IO to /dev/null, which is nowhere.
+    This is for background processes obviously, to prevent them from messing up
+    the console.
+    */
     int fin = open("/dev/null", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     int fout = open("/dev/null", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
 
