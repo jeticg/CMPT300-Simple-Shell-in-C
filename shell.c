@@ -294,9 +294,12 @@ void execSingleCommand(char *tokens[], EXECUTION_CODE executionCode) {
               strlen("Something is wrong. TAT\n"));
         return;
     } else if (pid == 0) {
-        if (executionCode != DIRECT_EXECUTION)
+        if (executionCode != DIRECT_EXECUTION) {
             signal(SIGINT, SIG_IGN);
             signal(SIGTSTP, SIG_IGN);
+
+            redirectIO();
+        }
         callExecvp(tokens[0], tokens);
     } else {
         if (executionCode == DIRECT_EXECUTION) {

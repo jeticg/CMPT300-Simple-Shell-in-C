@@ -17,6 +17,7 @@
 #include <pwd.h>
 #include <limits.h>
 #include <signal.h>
+#include <fcntl.h>
 
 #include "subprocess.h"
 
@@ -270,4 +271,17 @@ void resumeSubprocess(int pid) {
     setActiveSubprocess(pid);
     while (pid == currentActiveSubprocess() && getpgid(pid) >= 0)
         waitpid(pid, NULL, WNOHANG);
+}
+
+
+void redirectIO() {
+    int fin = open("/dev/null", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    int fout = open("/dev/null", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+
+    dup2(fin, STDIN_FILENO); // make stdin  go to file
+    dup2(fout, STDOUT_FILENO); // make stdout go to file
+    dup2(fout, STDERR_FILENO); // make stderr go to file
+
+    close(fin);
+    close(fout);
 }
