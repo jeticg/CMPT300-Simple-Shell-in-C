@@ -66,12 +66,7 @@ int main() {
 
         // Execute commands
         execCommand(tokens);
-        /**
-         * Steps For Basic Shell:
-         * 1. Fork a child process
-         * 2. Child process invokes execvp() using results in token array.
-         */
-
+        memset(inputBuffer, 0, sizeof(inputBuffer));
     }
     return 0;
 }
