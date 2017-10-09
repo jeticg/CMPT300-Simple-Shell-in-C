@@ -35,6 +35,9 @@ int READING = 0;
 
 #include "aux.h"
 
+// Constants
+char *prompt = NULL;
+
 // DEFINE
 #define COMMAND_LENGTH 1024
 #define MAX_STRLEN 1024
@@ -199,19 +202,26 @@ void expandEvent(char *buff, int maxLen) {
 void getPrompt(char **buff) {
     // Check parameter
     if (buff == NULL) return;
+    if (prompt != NULL) free(prompt);
 
     // Get home directory
     char *tmp = getcwd(NULL, 0);
-    if (tmp == NULL) tmp = "";
 
     // Add trailing " > "
-    *buff = malloc(sizeof(char) * (strlen(tmp) + 3));
-    char *promt = *buff;
-    strcpy(promt, tmp);
-    promt[strlen(tmp) + 0] = ' ';
-    promt[strlen(tmp) + 1] = '>';
-    promt[strlen(tmp) + 2] = ' ';
-    promt[strlen(tmp) + 3] = '\0';
+    if (tmp == NULL) {
+        prompt = malloc(sizeof(char) * 3);
+        strcpy(prompt, "> ");
+    } else {
+        prompt = malloc(sizeof(char) * (strlen(tmp) + 3));
+        strcpy(prompt, tmp);
+        prompt[strlen(tmp) + 0] = ' ';
+        prompt[strlen(tmp) + 1] = '>';
+        prompt[strlen(tmp) + 2] = ' ';
+        prompt[strlen(tmp) + 3] = '\0';
+        free(tmp);
+    }
+
+    *buff = prompt;
 }
 
 
@@ -325,6 +335,7 @@ void clearHistory() {
             free(tmp->value);
         free(tmp);
     }
+    if (prompt != NULL) free(prompt);
 }
 
 #ifdef CHICKEN
@@ -343,10 +354,11 @@ int reader(void *buf, size_t nbyte) {
         // manually.
         strncpy(buf, "", nbyte);
         write(STDOUT_FILENO, "\n", 1);
+    } else {
+        strncpy(buf, line, nbyte);
+        free(line);
     }
-    else strncpy(buf, line, nbyte);
 
-    free(prompt);
     READING = 0;
     return (int)strlen(buf);
 }
