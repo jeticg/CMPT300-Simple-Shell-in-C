@@ -6,3 +6,4 @@ jobs:
     - os: linux
       compiler: gcc
       language: c
+script: make
