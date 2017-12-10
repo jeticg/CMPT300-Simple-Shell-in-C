@@ -1,0 +1,8 @@
+jobs:
+  include:
+    - os: osx
+      compiler: clang
+      language: c
+    - os: linux
+      compiler: gcc
+      language: c
