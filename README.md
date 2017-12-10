@@ -1,4 +1,5 @@
 # CMPT300-Projekt 2:
+![Fun](https://travis-ci.org/jeticg/Simple-Shell-in-C.svg?branch=master)
 # A very simple shell written in C
 
 ## 0. Dev environment
