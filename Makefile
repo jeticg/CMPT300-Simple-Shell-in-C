@@ -6,7 +6,7 @@ CC=cc
 CXX=CC
 CCFLAGS= -g -std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Werror -Wextra -Wconversion -DCHICKEN
 
-all: shell errorExplain subprocess
+all: shell
 
 # Compile all .c files into .o files
 # % matches all (like * in a command)
@@ -21,4 +21,4 @@ shell: shell.o errorExplain.o aux.o subprocess.o
 	$(CC) -o shell *.o -lreadline $(CCFLAGS)
 
 clean:
-	rm -f core *.o shell shell_sol
+	rm -f core *.o shell
